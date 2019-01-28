@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.12)
+enable_testing()
+
+project(tempura CXX)
+
+function(add_source_group)
+    foreach(_source IN ITEMS ${ARGN})
+        if (IS_ABSOLUTE ${_source})
+            file(RELATIVE_PATH _source_rel ${CMAKE_CURRENT_SOURCE_DIR} ${_source})
+        else()
+            set(_source_rel "${_source}")
+        endif()
+        get_filename_component(_source_path ${_source_rel} DIRECTORY)
+        string(REPLACE "/" "\\" _group "${_source_path}")
+        source_group("${_group}" FILES "${_source}")
+    endforeach()
+endfunction(add_source_group)
+
+include_directories(./)
+
+if(APPLE)
+    add_definitions("-Wall -std=c++17")
+elseif(WIN32)
+    add_definitions("-W4")
+endif(APPLE)
+
+set(TEMP_USE_BOOST ON CACHE BOOL "To use filesystem in a environment before c++17.")
+
+add_subdirectory(temp)
+add_subdirectory(test)
