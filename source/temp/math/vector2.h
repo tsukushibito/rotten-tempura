@@ -3,12 +3,15 @@
 #include <cmath>
 #include <cstdint>
 
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
 
 #include "temp/core/assertion.h"
 #include "temp/core/define.h"
+
+#include "temp/math/constants.h"
 
 namespace temp {
 namespace math {
@@ -17,6 +20,13 @@ template <class T>
 class Vector2Base {
  public:
   static const std::size_t kDimention = 2;
+  static const Vector2Base kZero;
+  static const Vector2Base kRight;
+  static const Vector2Base kLeft;
+  static const Vector2Base kUp;
+  static const Vector2Base kDown;
+
+  using iterator = typename std::array<T, kDimention>::iterator;
 
   Vector2Base() : Vector2Base((T)0, (T)0) {}
   explicit Vector2Base(T x, T y) {
@@ -29,6 +39,10 @@ class Vector2Base {
   Vector2Base& operator=(const Vector2Base&) = default;
 
  public:
+  iterator begin() { return values_.begin(); }
+
+  iterator end() { return values_.end(); }
+
   std::string toString() const {
     std::stringstream ss;
     ss << "Vector2(" << x() << ", " << y() << ")";
@@ -53,6 +67,12 @@ class Vector2Base {
   bool operator==(const Vector2Base& rhs) const {
     return x() == rhs.x() && y() == rhs.y();
   }
+
+  bool operator!=(const Vector2Base& rhs) const { return !(*this == rhs); }
+
+  Vector2Base operator+() const { return *this; }
+
+  Vector2Base operator-() const { return Vector2Base(-x(), -y()); }
 
   Vector2Base& operator+=(const Vector2Base& rhs) {
     x() += rhs.x();
@@ -80,15 +100,26 @@ class Vector2Base {
   }
 
   T magnitude() const { return sqrtf(squared_magnitude()); }
-  T squared_magnitude() const { return x() * x() + y() + y(); }
+  T squared_magnitude() const { return x() * x() + y() * y(); }
 
   Vector2Base normalized() const { return *this / magnitude(); }
 
   void normalize() { *this /= magnitude(); }
 
  private:
-  T values_[kDimention];
+  std::array<T, kDimention> values_;
 };
+
+template <class T>
+const Vector2Base<T> Vector2Base<T>::kZero = Vector2Base<T>(0, 0);
+template <class T>
+const Vector2Base<T> Vector2Base<T>::kRight = Vector2Base<T>(1, 0);
+template <class T>
+const Vector2Base<T> Vector2Base<T>::kLeft = Vector2Base<T>(-1, 0);
+template <class T>
+const Vector2Base<T> Vector2Base<T>::kUp = Vector2Base<T>(0, 1);
+template <class T>
+const Vector2Base<T> Vector2Base<T>::kDown = Vector2Base<T>(0, -1);
 
 template <class T>
 std::ostream& operator<<(std::ostream& stream, const Vector2Base<T>& vec2) {
@@ -122,7 +153,7 @@ Vector2Base<T> operator/(const Vector2Base<T>& lhs, float rhs) {
 }
 
 template <class T>
-T angle(const Vector2Base<T>& from, const Vector2Base<T>& to) {
+T angle_rad(const Vector2Base<T>& from, const Vector2Base<T>& to) {
   auto from_magnitude_to_magnitude = from.magnitude() * to.magnitude();
   if (from_magnitude_to_magnitude == (T)0) return (T)0;
 
@@ -133,11 +164,26 @@ T angle(const Vector2Base<T>& from, const Vector2Base<T>& to) {
 }
 
 template <class T>
+T angle_deg(const Vector2Base<T>& from, const Vector2Base<T>& to) {
+  return ((T)180 / kPi) * angle_rad(from, to);
+}
+
+template <class T>
 T dot(const Vector2Base<T>& lhs, const Vector2Base<T>& rhs) {
-  return lhs.x() * rhs.x() + lhs.y() + rhs.y();
+  return lhs.x() * rhs.x() + lhs.y() * rhs.y();
+}
+
+template <class T>
+T distance(const Vector2Base<T>& lhs, const Vector2Base<T>& rhs) {
+  return (lhs - rhs).magnitude();
+}
+
+template <class T>
+Vector2Base<T> lerp(const Vector2Base<T>& lhs, const Vector2Base<T>& rhs, T t) {
+  return lhs * (1 - t) + rhs * (t);
 }
 
 using Vector2 = Vector2Base<float>;
-using Vector2_64 = Vector2Base<double>;
+using Vector2_64b = Vector2Base<double>;
 }  // namespace math
 }  // namespace temp
