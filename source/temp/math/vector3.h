@@ -169,22 +169,16 @@ Vector3Base<T> operator/(const Vector3Base<T>& lhs, float rhs) {
 }
 
 template <class T>
-T angle_rad(const Vector3Base<T>& from, const Vector3Base<T>& to,
-            const Vector3Base<T>& axis) {
-  auto unsigned_angle = unsigned_angle_rad(from, to);
+T angle(const Vector3Base<T>& from, const Vector3Base<T>& to,
+        const Vector3Base<T>& axis) {
+  auto uangle = unsigned_angle(from, to);
   auto c = cross(from, to);
-  auto angle = dot(axis, c) >= 0 ? unsigned_angle : -unsigned_angle;
+  auto angle = dot(axis, c) >= 0 ? uangle : -uangle;
   return angle;
 }
 
 template <class T>
-T angle_deg(const Vector3Base<T>& from, const Vector3Base<T>& to,
-            const Vector3Base<T>& axis) {
-  return ((T)180 / kPi) * angle_rad(from, to, axis);
-}
-
-template <class T>
-T unsigned_angle_rad(const Vector3Base<T>& from, const Vector3Base<T>& to) {
+T unsigned_angle(const Vector3Base<T>& from, const Vector3Base<T>& to) {
   auto from_magnitude_to_magnitude = from.magnitude() * to.magnitude();
   if (from_magnitude_to_magnitude == (T)0) {
     return (T)0;
@@ -193,12 +187,7 @@ T unsigned_angle_rad(const Vector3Base<T>& from, const Vector3Base<T>& to) {
   auto cos = dot(from, to) / from_magnitude_to_magnitude;
   T unsigned_angle = std::acos((T)cos);
 
-  return unsigned_angle;
-}
-
-template <class T>
-T unsigned_angle_deg(const Vector3Base<T>& from, const Vector3Base<T>& to) {
-  return ((T)180 / kPi) * unsigned_angle_rad(from, to);
+  return ((T)180 / ConstantsBase<T>::kPi) * unsigned_angle;
 }
 
 template <class T>

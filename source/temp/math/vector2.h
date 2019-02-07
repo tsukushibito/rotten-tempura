@@ -153,19 +153,15 @@ Vector2Base<T> operator/(const Vector2Base<T>& lhs, float rhs) {
 }
 
 template <class T>
-T angle_rad(const Vector2Base<T>& from, const Vector2Base<T>& to) {
+T angle(const Vector2Base<T>& from, const Vector2Base<T>& to) {
   auto from_magnitude_to_magnitude = from.magnitude() * to.magnitude();
   if (from_magnitude_to_magnitude == (T)0) return (T)0;
 
   auto cos = dot(from, to) / from_magnitude_to_magnitude;
   auto unsigned_angle = std::acos((float)cos);
-  return from.x() * to.y() - from.y() * to.x() >= (T)0 ? unsigned_angle
-                                                       : -unsigned_angle;
-}
-
-template <class T>
-T angle_deg(const Vector2Base<T>& from, const Vector2Base<T>& to) {
-  return ((T)180 / kPi) * angle_rad(from, to);
+  auto rad = from.x() * to.y() - from.y() * to.x() >= (T)0 ? unsigned_angle
+                                                           : -unsigned_angle;
+  return ((T)180 / ConstantsBase<T>::kPi) * rad;
 }
 
 template <class T>

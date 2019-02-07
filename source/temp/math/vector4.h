@@ -155,6 +155,12 @@ Vector4Base<T> operator/(const Vector4Base<T>& lhs, float rhs) {
   return Vector4Base<T>(lhs) /= rhs;
 }
 
+template <class T>
+T dot(const Vector4Base<T>& lhs, const Vector4Base<T>& rhs) {
+  return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z() +
+         lhs.w() * rhs.w();
+}
+
 using Vector4 = Vector4Base<float>;
 using Vector4_64b = Vector4Base<double>;
 }  // namespace math

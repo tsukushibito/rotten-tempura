@@ -57,10 +57,8 @@ BOOST_AUTO_TEST_CASE(dist, *utf::tolerance(0.00001f)) {
 }
 
 BOOST_AUTO_TEST_CASE(ang, *utf::tolerance(0.00001f)) {
-  auto deg = angle_deg(Vector2(1.0f, 0.0f), Vector2(0.0f, 1.0f));
+  auto deg = angle(Vector2(1.0f, 0.0f), Vector2(0.0f, 1.0f));
   BOOST_CHECK_EQUAL(deg, 90.0f);
-  auto rad = angle_rad(Vector2(1.0f, 0.0f), Vector2(0.0f, 1.0f));
-  BOOST_CHECK_EQUAL(rad, kPi_2);
 }
 
 BOOST_AUTO_TEST_CASE(ler, *utf::tolerance(0.00001f)) {
@@ -118,17 +116,11 @@ BOOST_AUTO_TEST_CASE(nor, *utf::tolerance(0.00001f)) {
 
 BOOST_AUTO_TEST_CASE(ang, *utf::tolerance(0.00001f)) {
   auto deg =
-      unsigned_angle_deg(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f));
+      unsigned_angle(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f));
   BOOST_CHECK_EQUAL(deg, 90.0f);
-  auto rad =
-      unsigned_angle_rad(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f));
-  BOOST_CHECK_EQUAL(rad, kPi_2);
-  deg = angle_deg(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f),
-                  Vector3(0, 1, 0));
+  deg = angle(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f),
+              Vector3(0, 1, 0));
   BOOST_CHECK_EQUAL(deg, -90.0f);
-  rad = angle_rad(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f),
-                  Vector3(0, -1, 0));
-  BOOST_CHECK_EQUAL(rad, kPi_2);
 }
 
 BOOST_AUTO_TEST_CASE(dot_, *utf::tolerance(0.00001f)) {
@@ -207,4 +199,79 @@ BOOST_AUTO_TEST_CASE(dir) {
   BOOST_CHECK_EQUAL(c, Vector3::kForward);
 }
 
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(matrix)
+BOOST_AUTO_TEST_CASE(add) {
+  auto mat0 = Matrix44::kZero;
+  auto mat1 = Matrix44::kIdentity;
+  mat0 += mat1;
+  BOOST_CHECK_EQUAL(mat0, mat1);
+}
+
+BOOST_AUTO_TEST_CASE(det) {
+  auto mat0 = Matrix44::kZero;
+  auto mat1 = Matrix44::kIdentity;
+  auto mat2 = Matrix44(  //
+      1, 1, 1, -1,       //
+      1, 1, -1, 1,       //
+      1, -1, 1, 1,       //
+      -1, 1, 1, 1);
+  auto mat3 = Matrix44(  //
+      3, 1, 1, 2,        //
+      5, 1, 3, 4,        //
+      2, 0, 1, 0,        //
+      1, 3, 2, 1);
+  BOOST_CHECK_EQUAL(mat0.determinant(), 0);
+  BOOST_CHECK_EQUAL(mat1.determinant(), 1);
+  BOOST_CHECK_EQUAL(mat2.determinant(), -16);
+  BOOST_CHECK_EQUAL(mat3.determinant(), -22);
+}
+
+BOOST_AUTO_TEST_CASE(inv) {
+  auto mat0 = Matrix44(  //
+      3, 1, 1, 2,        //
+      5, 1, 3, 4,        //
+      2, 0, 1, 0,        //
+      1, 3, 2, 1);
+  auto id = mat0.inverse() * mat0;
+  auto offset = Matrix44(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+  auto mat1 = id + offset;
+  auto mat2 = Matrix44::kIdentity + offset;
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      BOOST_CHECK_CLOSE_FRACTION(mat1[i][j], mat2[i][j], 0.00001f);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(transpose) {
+  auto mat0 = Matrix44(  //
+      3, 1, 1, 2,        //
+      5, 1, 3, 4,        //
+      2, 0, 1, 0,        //
+      1, 3, 2, 1);
+  auto mat1 = Matrix44(  //
+      3, 5, 2, 1,        //
+      1, 1, 0, 3,        //
+      1, 3, 1, 2,        //
+      2, 4, 0, 1);
+  BOOST_CHECK_EQUAL(mat0.transpose(), mat1);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(matrix)
+BOOST_AUTO_TEST_CASE(euler) {
+  auto quat = Quaternion::axisAngle(Vector3(1, 0, 0), 90);
+  std::cout << quat << std::endl;
+  auto euler = quat.eulerAngles();
+  std::cout << euler << std::endl;
+  quat.x() = 0.5319757f;
+  quat.y() = 0.02226007f;
+  quat.z() = 0.2005621f;
+  quat.w() = 0.8223631f;
+  std::cout << quat << std::endl;
+  euler = quat.eulerAngles();
+  std::cout << euler << std::endl;
+}
 BOOST_AUTO_TEST_SUITE_END()
