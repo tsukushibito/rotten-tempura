@@ -31,18 +31,18 @@ BOOST_AUTO_TEST_CASE(div, *utf::tolerance(0.00001f)) {
 }
 
 BOOST_AUTO_TEST_CASE(mag, *utf::tolerance(0.00001f)) {
-  auto smag = Vector2(1.0f, 1.0f).squared_magnitude();
+  auto smag = squared_magnitude(Vector2(1.0f, 1.0f));
   BOOST_CHECK_EQUAL(smag, 2);
-  auto mag = Vector2(1.0f, 1.0f).magnitude();
+  auto mag = magnitude(Vector2(1.0f, 1.0f));
   BOOST_CHECK_EQUAL(mag, std::sqrt(2.0f));
 }
 
 BOOST_AUTO_TEST_CASE(nor, *utf::tolerance(0.00001f)) {
   auto vec2 = Vector2(3.0f, 3.0f);
-  auto normalized = vec2.normalized();
-  BOOST_CHECK_EQUAL(normalized.magnitude(), 1.0f);
-  vec2.normalize();
-  BOOST_CHECK_EQUAL(vec2.magnitude(), 1.0f);
+  auto normalized = normalize(vec2);
+  BOOST_CHECK_EQUAL(magnitude(normalized), 1.0f);
+  vec2 = normalize(vec2);
+  BOOST_CHECK_EQUAL(magnitude(vec2), 1.0f);
 }
 
 BOOST_AUTO_TEST_CASE(dot_, *utf::tolerance(0.00001f)) {
@@ -102,15 +102,15 @@ BOOST_AUTO_TEST_CASE(div, *utf::tolerance(0.00001f)) {
 }
 
 BOOST_AUTO_TEST_CASE(mag, *utf::tolerance(0.00001f)) {
-  BOOST_CHECK_EQUAL(Vector3(1.0f, 1.0f, 1.0f).squared_magnitude(), 3.0f);
-  BOOST_CHECK_EQUAL(Vector3(1.0f, 1.0f, 1.0f).magnitude(), std::sqrt(3.0f));
+  BOOST_CHECK_EQUAL(squared_magnitude(Vector3(1.0f, 1.0f, 1.0f)), 3.0f);
+  BOOST_CHECK_EQUAL(magnitude(Vector3(1.0f, 1.0f, 1.0f)), std::sqrt(3.0f));
 }
 
 BOOST_AUTO_TEST_CASE(nor, *utf::tolerance(0.00001f)) {
   auto root3 = std::sqrt(3.0f);
-  BOOST_CHECK_EQUAL(Vector3(1.0f, 1.0f, 1.0f).normalized(),
+  BOOST_CHECK_EQUAL(normalize(Vector3(1.0f, 1.0f, 1.0f)),
                     Vector3(1.0f / root3, 1.0f / root3, 1.0f / root3));
-  BOOST_CHECK_EQUAL(Vector3(3.0f, 2.0f, std::sqrt(3.0f)).normalized(),
+  BOOST_CHECK_EQUAL(normalize(Vector3(3.0f, 2.0f, std::sqrt(3.0f))),
                     Vector3(3.0f / 4.0f, 0.5f, std::sqrt(3.0f) / 4.0f));
 }
 
@@ -171,18 +171,16 @@ BOOST_AUTO_TEST_CASE(div, *utf::tolerance(0.00001f)) {
 }
 
 BOOST_AUTO_TEST_CASE(mag, *utf::tolerance(0.00001f)) {
-  auto smag = Vector4(1, 1, 1, 1).squared_magnitude();
+  auto smag = squared_magnitude(Vector4(1, 1, 1, 1));
   BOOST_CHECK_EQUAL(smag, 4);
-  auto mag = Vector4(1, 1, 1, 1).magnitude();
+  auto mag = magnitude(Vector4(1, 1, 1, 1));
   BOOST_CHECK_EQUAL(mag, 2);
 }
 
 BOOST_AUTO_TEST_CASE(nor, *utf::tolerance(0.00001f)) {
   auto vec4 = Vector4(3, 3, 1, 1);
-  auto normalized = vec4.normalized();
-  BOOST_TEST(normalized.magnitude() == 1.0f);
-  vec4.normalize();
-  BOOST_TEST(vec4.magnitude(), 1.0f);
+  auto normalized = normalize(vec4);
+  BOOST_TEST(magnitude(normalized) == 1.0f);
 }
 
 BOOST_AUTO_TEST_CASE(foreach_) {
@@ -222,10 +220,10 @@ BOOST_AUTO_TEST_CASE(det) {
       5, 1, 3, 4,        //
       2, 0, 1, 0,        //
       1, 3, 2, 1);
-  BOOST_CHECK_EQUAL(mat0.determinant(), 0);
-  BOOST_CHECK_EQUAL(mat1.determinant(), 1);
-  BOOST_CHECK_EQUAL(mat2.determinant(), -16);
-  BOOST_CHECK_EQUAL(mat3.determinant(), -22);
+  BOOST_CHECK_EQUAL(determinant(mat0), 0);
+  BOOST_CHECK_EQUAL(determinant(mat1), 1);
+  BOOST_CHECK_EQUAL(determinant(mat2), -16);
+  BOOST_CHECK_EQUAL(determinant(mat3), -22);
 }
 
 BOOST_AUTO_TEST_CASE(inv) {
@@ -234,7 +232,7 @@ BOOST_AUTO_TEST_CASE(inv) {
       5, 1, 3, 4,        //
       2, 0, 1, 0,        //
       1, 3, 2, 1);
-  auto id = mat0.inverse() * mat0;
+  auto id = inverse(mat0) * mat0;
   auto offset = Matrix44(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
   auto mat1 = id + offset;
   auto mat2 = Matrix44::kIdentity + offset;
@@ -245,7 +243,7 @@ BOOST_AUTO_TEST_CASE(inv) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(transpose) {
+BOOST_AUTO_TEST_CASE(transpose_) {
   auto mat0 = Matrix44(  //
       3, 1, 1, 2,        //
       5, 1, 3, 4,        //
@@ -256,22 +254,69 @@ BOOST_AUTO_TEST_CASE(transpose) {
       1, 1, 0, 3,        //
       1, 3, 1, 2,        //
       2, 4, 0, 1);
-  BOOST_CHECK_EQUAL(mat0.transpose(), mat1);
+  BOOST_CHECK_EQUAL(transpose(mat0), mat1);
+}
+
+BOOST_AUTO_TEST_CASE(transform_) {
+  auto scale = Vector3(1, 2, 1);
+  auto rotation = Quaternion::axisAngle(Vector3(0, 1, 0), 45);
+  auto translation = Vector3(0, -2, -sqrt(2.0f));
+  auto mat = Matrix44::scaleRotationTranslation(scale, rotation, translation);
+  auto pos = Vector3(1, 1, 1);
+  pos = transform(pos, mat);
+  pos += Vector3(1, 1, 1);
+  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 1, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 1, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.z(), 1, 0.00001f);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(matrix)
+BOOST_AUTO_TEST_SUITE(quat)
+BOOST_AUTO_TEST_CASE(mag) {
+  auto quat = Quaternion(1, 2, 3, 4);
+  BOOST_CHECK_CLOSE(magnitude(quat), sqrt(1.0f + 4.0f + 9.0f + 16.0f),
+                    0.00001f);
+}
+BOOST_AUTO_TEST_CASE(normalize_) {
+  auto quat = Quaternion(1, 2, 3, 4);
+  auto nl = normalize(quat);
+  auto nr = quat / magnitude(quat);
+  BOOST_CHECK_CLOSE_FRACTION(nl.x(), nr.x(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(nl.y(), nr.y(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(nl.z(), nr.z(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(nl.w(), nr.w(), 0.00001f);
+}
+BOOST_AUTO_TEST_CASE(inv) {
+  auto quat = Quaternion(1, 2, 3, 4);
+  auto inv = inverse(quat);
+  auto il = quat * inv;
+  auto ir = Quaternion::kIdentity;
+  BOOST_CHECK_CLOSE_FRACTION(il.x(), ir.x(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(il.y(), ir.y(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(il.z(), ir.z(), 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(il.w(), ir.w(), 0.00001f);
+}
 BOOST_AUTO_TEST_CASE(euler) {
   auto quat = Quaternion::axisAngle(Vector3(1, 0, 0), 90);
-  std::cout << quat << std::endl;
-  auto euler = quat.eulerAngles();
-  std::cout << euler << std::endl;
+  auto euler = eulerAngles(quat);
+  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 90, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 0, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 0, 0.00001f);
   quat.x() = 0.5319757f;
   quat.y() = 0.02226007f;
   quat.z() = 0.2005621f;
   quat.w() = 0.8223631f;
-  std::cout << quat << std::endl;
-  euler = quat.eulerAngles();
-  std::cout << euler << std::endl;
+  euler = eulerAngles(quat);
+  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 60, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 30, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 45, 0.00001f);
+}
+BOOST_AUTO_TEST_CASE(rot) {
+  auto quat = Quaternion::axisAngle(Vector3(0, 1, 0), 90);
+  auto pos = Vector3(1, 0, 0);
+  pos = rotate(pos, quat);
+  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 0, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 0, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.z(), -1, 0.00001f);
 }
 BOOST_AUTO_TEST_SUITE_END()
