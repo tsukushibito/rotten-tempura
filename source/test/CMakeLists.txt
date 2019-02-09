@@ -6,4 +6,5 @@ if(TEMP_USE_BOOST)
     endif(Boost_FOUND)
 endif(TEMP_USE_BOOST)
 
+add_subdirectory(core)
 add_subdirectory(math)
