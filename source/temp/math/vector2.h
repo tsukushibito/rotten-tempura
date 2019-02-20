@@ -23,6 +23,7 @@ class Vector2Base {
  public:
   using ElementsType = std::array<T, 2>;
   using iterator = typename ElementsType::iterator;
+  using const_iterator = typename ElementsType::const_iterator;
 
   static const Vector2Base kZero;
   static const Vector2Base kRight;
@@ -40,6 +41,9 @@ class Vector2Base {
  public:
   iterator begin();
   iterator end();
+
+  const iterator begin() const;
+  const iterator end() const;
 
   std::string toString() const;
 

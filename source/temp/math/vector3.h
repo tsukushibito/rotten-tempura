@@ -20,6 +20,7 @@ class Vector3Base {
  public:
   using ElementsType = std::array<T, 3>;
   using iterator = typename ElementsType::iterator;
+  using const_iterator = typename ElementsType::const_iterator;
 
   static const Vector3Base kZero;
   static const Vector3Base kRight;
@@ -40,6 +41,9 @@ class Vector3Base {
  public:
   iterator begin();
   iterator end();
+
+  const iterator begin() const;
+  const iterator end() const;
 
   std::string toString() const;
   T& operator[](std::size_t index);

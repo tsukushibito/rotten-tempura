@@ -24,6 +24,7 @@ class Vector4Base {
  public:
   using ElementsType = std::array<T, 4>;
   using iterator = typename ElementsType::iterator;
+  using const_iterator = typename ElementsType::const_iterator;
 
   Vector4Base();
   explicit Vector4Base(T x, T y, T z, T w);
@@ -36,6 +37,9 @@ class Vector4Base {
  public:
   iterator begin();
   iterator end();
+
+  const_iterator begin() const;
+  const_iterator end() const;
 
   std::string toString() const;
 

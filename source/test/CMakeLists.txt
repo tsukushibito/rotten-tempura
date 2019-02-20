@@ -8,3 +8,4 @@ endif(TEMP_USE_BOOST)
 
 add_subdirectory(core)
 add_subdirectory(math)
+add_subdirectory(app)
