@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "temp/app/mac/mac_application.h"
+#include "temp/core/logger.h"
 
 @interface ApplicationDelegate : NSObject < NSApplicationDelegate > {
 }
@@ -77,11 +78,17 @@ MacApplication::MacApplication()
     [properties_->view setLayer:metal_layer];
 
     native_window_handle_ = properties_->view;
+
+    TEMP_LOG_TRACE("Constructed MacApplication.");
 }
 
-MacApplication::~MacApplication() { [properties_->app terminate:properties_->app]; }
+MacApplication::~MacApplication() { [properties_->app terminate:properties_->app];
+
+    TEMP_LOG_TRACE("Destructed MacApplication.");
+ }
 
 std::int32_t MacApplication::Run() {
+    TEMP_LOG_TRACE("MacApplication begin running");
     on_initialize()();
 
     std::packaged_task<void()> task([this](){MainLoop();});
@@ -95,6 +102,7 @@ std::int32_t MacApplication::Run() {
 
     on_terminate()();
 
+    TEMP_LOG_TRACE("MacApplication end running");
     return 0;
 }
 
