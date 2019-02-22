@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
   app::Application application;
 
   auto window = application.native_window_handle();
-  gfx::Device device(window);
+  auto device = gfx::CreateDevice(gfx::ApiType::kVulkan, window);
 
   application.Run();
 

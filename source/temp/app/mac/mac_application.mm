@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include <future>
 #include <thread>
@@ -38,7 +39,8 @@ struct MacApplication::Properties {
 
     std::atomic_char exit_flag;
 
-    NSWindow *window_handle = nil;
+    NSWindow *window = nil;
+    NSView *view = nil;
 };
 
 MacApplication::MacApplication()
@@ -51,25 +53,30 @@ MacApplication::MacApplication()
     properties_->exit_flag = 0;
 
     auto delegate = [[WindowDelegate alloc] init];
-    properties_->window_handle = [[NSWindow alloc]
+    properties_->window = [[NSWindow alloc]
         initWithContentRect:NSMakeRect(0, 0, 1080, 720)
                     styleMask:NSWindowStyleMaskTitled
                             | NSWindowStyleMaskMiniaturizable
                             | NSWindowStyleMaskClosable
                     backing:NSBackingStoreBuffered
                         defer:NO];
-    [properties_->window_handle setTitle:@"てんぷら"];
-    [properties_->window_handle center];
-    [properties_->window_handle setDelegate:delegate];
-    [properties_->window_handle makeKeyWindow];
-    NSWindowCollectionBehavior behavior = [properties_->window_handle collectionBehavior];
+    [properties_->window setTitle:@"てんぷら"];
+    [properties_->window center];
+    [properties_->window setDelegate:delegate];
+    [properties_->window makeKeyWindow];
+    NSWindowCollectionBehavior behavior = [properties_->window collectionBehavior];
     behavior |= NSWindowCollectionBehaviorManaged
                 | NSWindowCollectionBehaviorParticipatesInCycle
                 | NSWindowCollectionBehaviorFullScreenPrimary;
-    [properties_->window_handle setCollectionBehavior:behavior];
-    [properties_->window_handle orderFrontRegardless];
+    [properties_->window setCollectionBehavior:behavior];
+    [properties_->window orderFrontRegardless];
 
-    native_window_handle_ = properties_->window_handle;
+    properties_->view = [properties_->window contentView];
+        
+    CAMetalLayer* metal_layer = [CAMetalLayer layer];
+    [properties_->view setLayer:metal_layer];
+
+    native_window_handle_ = properties_->view;
 }
 
 MacApplication::~MacApplication() { [properties_->app terminate:properties_->app]; }

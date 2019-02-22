@@ -3,6 +3,7 @@
 #include <functional>
 #include <mutex>
 #include <string>
+#include <tuple>
 
 #include <vulkan/vulkan.hpp>
 
@@ -14,16 +15,8 @@ class Context {
  public:
   Context(const void* window);
 
- private:
-  vk::UniqueInstance CreateInstance(const std::string& app_name,
-                                    const std::string& engine_name,
-                                    bool enabled_validation);
-
-  void SetupDebugging(const vk::Instance& instance,
-                      const vk::DebugReportFlagsEXT& flags);
-
-  vk::UniqueSurfaceKHR CreateWindowSurface(const vk::UniqueInstance& instance,
-                                           const void* window);
+ public:
+  std::vector<vk::Format> GetSupportedDepthFormats() const;
 
  private:
   vk::DispatchLoaderDynamic dispatcher_;
@@ -33,23 +26,24 @@ class Context {
   std::vector<vk::PhysicalDevice> physical_devices_;
   vk::PhysicalDevice physical_device_;
 
-  std::vector<vk::QueueFamilyProperties> queue_family_properties_;
-
   vk::PhysicalDeviceProperties device_properties_;
-
   vk::PhysicalDeviceFeatures device_features_;
-  vk::PhysicalDeviceFeatures2 enabled_features2_;
-  vk::PhysicalDeviceFeatures& enabled_features_ = enabled_features2_.features;
-
   vk::PhysicalDeviceMemoryProperties device_memory_properties_;
 
-  vk::Device device_;
+  std::vector<vk::QueueFamilyProperties> queue_family_properties_;
+  int graphics_queue_index_ = -1;
+  int present_queue_index_ = -1;
+  int compute_queue_index_ = -1;
 
-  vk::PipelineCache pipeline_cache_;
+  vk::UniqueDevice device_;
+
+  vk::UniquePipelineCache pipeline_cache_;
+  vk::Queue graphics_queue_;
+  vk::Queue present_queue_;
+  vk::Queue compute_queue_;
 
   vk::UniqueSurfaceKHR surface_;
 
-  std::once_flag dispatcher_init_flag_;
   vk::DebugReportCallbackEXT msg_callback_;
 };
 }  // namespace tvk

@@ -1,24 +1,30 @@
 #pragma once
 #include <memory>
 
+#include "temp/gfx/api_type.h"
+
 namespace temp {
 namespace gfx {
+
+class SwapChain;
+
 class Device {
+ protected:
+  Device() = default;
+
  public:
-  Device() : Device(nullptr) {}
-  explicit Device(const void* window);
+  virtual ~Device() = default;
 
-  Device(const Device&) = delete;
-  Device& operator=(const Device&) = delete;
+ public:
+  virtual ApiType api_type() const = 0;
 
-  Device(Device&& other) noexcept = default;
-  Device& operator=(Device&& other) = default;
+  virtual std::shared_ptr<SwapChain> default_swap_chain() const = 0;
 
-  ~Device();
-
- private:
-  class Impl;
-  std::unique_ptr<Impl> impl_;
+  virtual std::unique_ptr<SwapChain> CreateSwapChain(
+      const void* window) const = 0;
 };
+
+std::unique_ptr<Device> CreateDevice(ApiType api, const void* window);
+
 }  // namespace gfx
 }  // namespace temp
