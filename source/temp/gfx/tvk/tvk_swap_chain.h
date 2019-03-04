@@ -9,6 +9,12 @@ namespace tvk {
 
 class TvkSwapChain : public SwapChain {
  public:
+  struct Image {
+    vk::Image image;
+    vk::ImageView view;
+    vk::Fence fence;
+  };
+
   explicit TvkSwapChain(const TvkDevice& device, const void* window,
                         std::uint32_t width, std::uint32_t height);
   ~TvkSwapChain() = default;
@@ -31,8 +37,11 @@ class TvkSwapChain : public SwapChain {
   void CreateSwapChain() const;
 
   vk::UniqueSurfaceKHR surface_;
+  vk::Format color_format_;
+  vk::ColorSpaceKHR color_space_;
   vk::SwapchainCreateInfoKHR create_info_;
   vk::UniqueSwapchainKHR swap_chain_;
+  std::vector<Image> images_;
   vk::Queue queue_;
 
   int current_image_ = 0;
