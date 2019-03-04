@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+﻿cmake_minimum_required(VERSION 3.12)
 
 file(GLOB_RECURSE cpp RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 file(GLOB_RECURSE h RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h)
@@ -33,7 +33,6 @@ add_library(temp_core STATIC ${source_list})
 target_link_libraries(temp_core ${EXTRA_LIBS})
 
 if(TEMP_USE_BOOST)
-    find_package(Boost COMPONENTS system filesystem) 
     if(Boost_FOUND)
         target_include_directories(temp_core PRIVATE ${Boost_INCLUDE_DIRS})
         message("${Boost_INCLUDE_DIRS}")

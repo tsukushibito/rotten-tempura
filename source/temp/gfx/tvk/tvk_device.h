@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "temp/gfx/device.h"
-#include "temp/gfx/tvk/tvk_swap_chain.h"
+#include "temp/gfx/tvk/tvk_context.h"
 
 namespace temp {
 namespace gfx {

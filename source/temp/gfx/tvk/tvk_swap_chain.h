@@ -2,6 +2,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "temp/gfx/swap_chain.h"
+#include "temp/gfx/tvk/tvk_device.h"
 
 namespace temp {
 namespace gfx {

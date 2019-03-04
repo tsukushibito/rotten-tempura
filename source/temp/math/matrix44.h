@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file matrix44.h
  * @author tsukushibito (tsukushibito@gmail.com)
  * @brief matrix4x4 class

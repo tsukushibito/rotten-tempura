@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #if defined(__alpha__) || defined(__ia64__) || defined(__x86_64__) || \
     defined(_WIN64) || defined(__LP64__) || defined(__LLP64__)
@@ -15,6 +15,7 @@
 #define TEMP_GFX_API_OPENGL
 #define TEMP_GFX_API_D3D12
 #define TEMP_GFX_API_D3D11
+#pragma warning(disable:4566)
 #endif
 
 #elif defined __APPLE__

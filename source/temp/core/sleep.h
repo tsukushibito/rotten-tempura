@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "temp/core/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
 #include <Windows.h>

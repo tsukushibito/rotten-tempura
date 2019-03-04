@@ -111,8 +111,9 @@ vk::UniqueInstance CreateInstance(const std::string& app_name,
         (uint32_t)instanceExtensions.size();
     instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
   }
+  std::vector<const char*> layers;
   if (enabled_validation) {
-    auto layers = FilterLayers(kValidationLayerNames);
+    layers = FilterLayers(kValidationLayerNames);
     instanceCreateInfo.enabledLayerCount = layers.size();
     instanceCreateInfo.ppEnabledLayerNames = layers.data();
   }
@@ -154,6 +155,10 @@ vk::PhysicalDevice PickPhysicalDevices(
 vk::UniqueSurfaceKHR CreateWindowSurface(const vk::Instance& instance,
                                          const void* window) {
 #if defined(_WIN32)
+  vk::Win32SurfaceCreateInfoKHR info;
+  info.hwnd = (const HWND)window;
+  info.hinstance = GetModuleHandle(NULL);
+  return instance.createWin32SurfaceKHRUnique(info, nullptr);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 #elif defined(_DIRECT2DISPLAY)
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
@@ -205,39 +210,38 @@ CreateLogicalDevice(
   auto graphics_queue_index = queue_index_table[vk::QueueFlagBits::eGraphics];
 
   std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
-  {
-    vk::DeviceQueueCreateInfo graphics_queue_create_info;
-    graphics_queue_create_info.queueFamilyIndex = graphics_queue_index;
-    graphics_queue_create_info.queueCount =
-        queue_family_properties[graphics_queue_index].queueCount;
-    std::vector<float> queue_priorities;
-    for (int i = 0; i < graphics_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f);
-    }
-    graphics_queue_create_info.pQueuePriorities = queue_priorities.data();
-    queue_create_infos.emplace_back(graphics_queue_create_info);
+  vk::DeviceQueueCreateInfo graphics_queue_create_info;
+  graphics_queue_create_info.queueFamilyIndex = graphics_queue_index;
+  graphics_queue_create_info.queueCount =
+      queue_family_properties[graphics_queue_index].queueCount;
+  std::vector<float> graphics_queue_priorities;
+  for (int i = 0; i < graphics_queue_create_info.queueCount; ++i) {
+    graphics_queue_priorities.emplace_back(1.0f);
   }
+  graphics_queue_create_info.pQueuePriorities = graphics_queue_priorities.data();
+  queue_create_infos.emplace_back(graphics_queue_create_info);
 
   auto iter = queue_index_table.find(vk::QueueFlagBits::eCompute);
   auto compute_queue_index =
       iter != queue_index_table.end() ? iter->second : -1;
+  std::vector<float> compute_queue_priorities;
   if (compute_queue_index != -1 &&
       graphics_queue_index != compute_queue_index) {
     vk::DeviceQueueCreateInfo compute_queue_create_info;
     compute_queue_create_info.queueFamilyIndex = compute_queue_index;
     compute_queue_create_info.queueCount =
         queue_family_properties[compute_queue_index].queueCount;
-    std::vector<float> queue_priorities;
     for (int i = 0; i < compute_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f);
+      compute_queue_priorities.emplace_back(1.0f);
     }
-    compute_queue_create_info.pQueuePriorities = queue_priorities.data();
+    compute_queue_create_info.pQueuePriorities = compute_queue_priorities.data();
     queue_create_infos.emplace_back(compute_queue_create_info);
   }
 
   iter = queue_index_table.find(vk::QueueFlagBits::eTransfer);
   auto transfer_queue_index =
       iter != queue_index_table.end() ? iter->second : -1;
+  std::vector<float> transfer_queue_priorities;
   if (transfer_queue_index != -1 &&
       graphics_queue_index != transfer_queue_index &&
       compute_queue_index != transfer_queue_index) {
@@ -245,11 +249,10 @@ CreateLogicalDevice(
     transfer_queue_create_info.queueFamilyIndex = transfer_queue_index;
     transfer_queue_create_info.queueCount =
         queue_family_properties[transfer_queue_index].queueCount;
-    std::vector<float> queue_priorities;
     for (int i = 0; i < transfer_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f);
+      transfer_queue_priorities.emplace_back(1.0f);
     }
-    transfer_queue_create_info.pQueuePriorities = queue_priorities.data();
+    transfer_queue_create_info.pQueuePriorities = transfer_queue_priorities.data();
     queue_create_infos.emplace_back(transfer_queue_create_info);
   }
 

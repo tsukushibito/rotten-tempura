@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "temp/math/constants.h"
 #include "temp/math/matrix44.h"
 #include "temp/math/matrix44_functions.h"

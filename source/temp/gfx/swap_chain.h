@@ -1,4 +1,5 @@
-#pragma once
+﻿#pragma once
+#include <cstdint>
 #include <memory>
 
 #include "temp/gfx/device.h"

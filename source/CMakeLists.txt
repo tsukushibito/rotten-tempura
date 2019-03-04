@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+﻿cmake_minimum_required(VERSION 3.12)
 enable_testing()
 
 project(tempura CXX)
@@ -25,6 +25,13 @@ elseif(WIN32)
 endif(APPLE)
 
 set(TEMP_USE_BOOST ON CACHE BOOL "To use filesystem in a environment before c++17.")
+
+if(TEMP_USE_BOOST)
+    find_package(Boost COMPONENTS system filesystem unit_test_framework) 
+    if(Boost_FOUND)
+    endif(Boost_FOUND)
+endif(TEMP_USE_BOOST)
+
 
 add_subdirectory(temp)
 add_subdirectory(test)
