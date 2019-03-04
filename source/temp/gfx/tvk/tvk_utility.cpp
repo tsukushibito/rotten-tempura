@@ -1,4 +1,4 @@
-#include "temp/core/define.h"
+﻿#include "temp/core/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
 #include <algorithm>
@@ -218,7 +218,8 @@ CreateLogicalDevice(
   for (int i = 0; i < graphics_queue_create_info.queueCount; ++i) {
     graphics_queue_priorities.emplace_back(1.0f);
   }
-  graphics_queue_create_info.pQueuePriorities = graphics_queue_priorities.data();
+  graphics_queue_create_info.pQueuePriorities =
+      graphics_queue_priorities.data();
   queue_create_infos.emplace_back(graphics_queue_create_info);
 
   auto iter = queue_index_table.find(vk::QueueFlagBits::eCompute);
@@ -234,7 +235,8 @@ CreateLogicalDevice(
     for (int i = 0; i < compute_queue_create_info.queueCount; ++i) {
       compute_queue_priorities.emplace_back(1.0f);
     }
-    compute_queue_create_info.pQueuePriorities = compute_queue_priorities.data();
+    compute_queue_create_info.pQueuePriorities =
+        compute_queue_priorities.data();
     queue_create_infos.emplace_back(compute_queue_create_info);
   }
 
@@ -252,7 +254,8 @@ CreateLogicalDevice(
     for (int i = 0; i < transfer_queue_create_info.queueCount; ++i) {
       transfer_queue_priorities.emplace_back(1.0f);
     }
-    transfer_queue_create_info.pQueuePriorities = transfer_queue_priorities.data();
+    transfer_queue_create_info.pQueuePriorities =
+        transfer_queue_priorities.data();
     queue_create_infos.emplace_back(transfer_queue_create_info);
   }
 
