@@ -32,8 +32,7 @@ CreateLogicalDevice(
 
 vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
     vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
-    const vk::Extent2D& extent, vk::Format color_format,
-    vk::ColorSpaceKHR color_space, vk::SwapchainKHR old_swap_chain);
+    const vk::Extent2D& extent, vk::SwapchainKHR old_swap_chain);
 
 }  // namespace tvk
 }  // namespace gfx

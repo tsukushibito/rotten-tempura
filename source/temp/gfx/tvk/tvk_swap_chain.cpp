@@ -17,10 +17,12 @@ TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
   auto vk_device = device.device();
 
   surface_ = CreateWindowSurface(vk_instance, window);
+
   auto extent = vk::Extent2D(width, height);
-  // create_info_ =
-  //     SetupSwapchainCreateInfo(vk_physical_device, *surface_, extent,
-  //                              color_format, color_space, VK_NULL_HANDLE);
+  create_info_ = SetupSwapchainCreateInfo(vk_physical_device, *surface_, extent,
+                                          vk::SwapchainKHR());
+
+  swap_chain_ = vk_device.createSwapchainKHRUnique(create_info_);
 }
 
 void TvkSwapChain::Present(const Device* device) const {
@@ -34,6 +36,19 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
                           std::uint32_t height) {
   assert(device->api_type() == ApiType::kVulkan);
   auto tvk_device = static_cast<const TvkDevice*>(device);
+  auto vk_physical_device = tvk_device->physical_device();
+  auto vk_device = tvk_device->device();
+
+  create_info_.imageExtent.width = width;
+  create_info_.imageExtent.width = height;
+  create_info_.oldSwapchain = *swap_chain_;
+
+  swap_chain_ = vk_device.createSwapchainKHRUnique(create_info_);
+  if (create_info_.oldSwapchain != vk::SwapchainKHR()) {
+    for (auto&& image : images_) {
+      vk_device.destroyImageView(image.view);
+    }
+  }
 }
 
 void TvkSwapChain::CreateSwapChain() const {}

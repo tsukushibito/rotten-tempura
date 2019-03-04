@@ -295,8 +295,7 @@ CreateLogicalDevice(
 
 vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
     vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
-    const vk::Extent2D& extent, vk::Format color_format,
-    vk::ColorSpaceKHR color_space, vk::SwapchainKHR old_swap_chain) {
+    const vk::Extent2D& extent, vk::SwapchainKHR old_swap_chain) {
   auto surf_caps = physical_device.getSurfaceCapabilitiesKHR(surface);
 
   vk::Extent2D swapchain_extent;
@@ -339,11 +338,27 @@ vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
     }
   }
 
+  auto color_formats = physical_device.getSurfaceFormatsKHR(surface);
+  vk::SurfaceFormatKHR surface_format = color_formats[0];
+  if (color_formats.size() == 1 &&
+      color_formats[0].format == vk::Format::eUndefined) {
+    surface_format.format = vk::Format::eB8G8R8A8Unorm;
+    surface_format.colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
+  } else {
+    for (auto&& format : color_formats) {
+      if (format.format == vk::Format::eB8G8R8A8Unorm &&
+          format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+        surface_format = format;
+        break;
+      }
+    }
+  }
+
   vk::SwapchainCreateInfoKHR create_info;
   create_info.surface = surface;
   create_info.minImageCount = desired_number_of_swapchain_images;
-  create_info.imageFormat = color_format;
-  create_info.imageColorSpace = color_space;
+  create_info.imageFormat = surface_format.format;
+  create_info.imageColorSpace = surface_format.colorSpace;
   create_info.imageExtent =
       vk::Extent2D{swapchain_extent.width, swapchain_extent.height};
   create_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
