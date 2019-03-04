@@ -36,25 +36,34 @@ Context::Context(const void* window) {
   device_memory_properties_ = physical_device_.getMemoryProperties();
   queue_family_properties_ = physical_device_.getQueueFamilyProperties();
 
-  surface_ = CreateWindowSurface(*instance_, window);
-
-  auto device_and_queue_indices = CreateLogicalDevice(
-      physical_device_, queue_family_properties_, *surface_, true);
+  auto device_and_queue_indices =
+      CreateLogicalDevice(physical_device_, queue_family_properties_, false);
 
   device_ = std::move(std::get<0>(device_and_queue_indices));
-  graphics_queue_index_ = std::get<1>(device_and_queue_indices);
-  present_queue_index_ = std::get<2>(device_and_queue_indices);
-  compute_queue_index_ = std::get<3>(device_and_queue_indices);
+  if ((VkDevice)(*device_) == VK_NULL_HANDLE) {
+    TEMP_LOG_ERROR("Could not create vulkan device!");
+    std::abort();
+  }
+  queue_index_table_ = std::get<1>(device_and_queue_indices);
 
   dispatcher_.init(*instance_, *device_);
 
   pipeline_cache_ =
       device_->createPipelineCacheUnique(vk::PipelineCacheCreateInfo());
 
-  graphics_queue_ = device_->getQueue(graphics_queue_index_, 0);
-  present_queue_ = device_->getQueue(present_queue_index_, 0);
-  if (compute_queue_index_ != -1) {
-    compute_queue_ = device_->getQueue(compute_queue_index_, 0);
+  queue_table_[vk::QueueFlagBits::eGraphics] =
+      device_->getQueue(queue_index_table_[vk::QueueFlagBits::eGraphics], 0);
+
+  auto iter = queue_index_table_.find(vk::QueueFlagBits::eCompute);
+  if (iter != queue_index_table_.end()) {
+    queue_table_[vk::QueueFlagBits::eCompute] =
+        device_->getQueue(iter->second, 0);
+  }
+
+  iter = queue_index_table_.find(vk::QueueFlagBits::eTransfer);
+  if (iter != queue_index_table_.end()) {
+    queue_table_[vk::QueueFlagBits::eTransfer] =
+        device_->getQueue(iter->second, 0);
   }
 }
 

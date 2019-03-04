@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <tuple>
 #include <vector>
 
@@ -23,10 +24,16 @@ vk::PhysicalDevice PickPhysicalDevices(
 vk::UniqueSurfaceKHR CreateWindowSurface(const vk::Instance& instance,
                                          const void* window);
 
-std::tuple<vk::UniqueDevice, int, int, int> CreateLogicalDevice(
+std::tuple<vk::UniqueDevice, std::map<vk::QueueFlagBits, int>>
+CreateLogicalDevice(
     const vk::PhysicalDevice& physical_device,
     const std::vector<vk::QueueFamilyProperties>& queue_family_properties,
-    const vk::SurfaceKHR& surface, bool enabled_debug_marker);
+    bool enabled_debug_marker);
+
+vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
+    vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
+    const vk::Extent2D& extent, vk::Format color_format,
+    vk::ColorSpaceKHR color_space, vk::SwapchainKHR old_swap_chain);
 
 }  // namespace tvk
 }  // namespace gfx

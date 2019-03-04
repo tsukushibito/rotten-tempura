@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "temp/gfx/device.h"
+#include "temp/gfx/tvk/tvk_swap_chain.h"
 
 namespace temp {
 namespace gfx {
@@ -15,28 +16,32 @@ class TvkDevice : public Device {
   TvkDevice() : TvkDevice(nullptr) {}
   explicit TvkDevice(const void* window);
 
+  ~TvkDevice();
+
   TvkDevice(const TvkDevice&) = delete;
   TvkDevice& operator=(const TvkDevice&) = delete;
 
   TvkDevice(TvkDevice&& other) = default;
   TvkDevice& operator=(TvkDevice&& other) = default;
 
-  ~TvkDevice() = default;
-
  public:
   ApiType api_type() const override { return ApiType::kVulkan; }
 
-  std::shared_ptr<SwapChain> default_swap_chain() const override {
-    return nullptr;
-  }
+  SwapChain& main_swap_chain() const override { return *main_swap_chain_; }
 
   std::unique_ptr<SwapChain> CreateSwapChain(
-      const void* window) const override {
-    return nullptr;
+      const void* window, std::uint32_t width,
+      std::uint32_t height) const override;
+
+  vk::Instance instance() const { return context_->instance(); }
+  vk::PhysicalDevice physical_device() const {
+    return context_->physical_device();
   }
+  vk::Device device() const { return context_->device(); }
 
  private:
-  std::shared_ptr<Context> context_;
+  std::unique_ptr<Context> context_;
+  std::unique_ptr<SwapChain> main_swap_chain_;
 };
 }  // namespace tvk
 }  // namespace gfx

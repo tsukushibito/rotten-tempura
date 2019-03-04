@@ -1,6 +1,7 @@
 #include "temp/core/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <sstream>
@@ -168,36 +169,40 @@ vk::UniqueSurfaceKHR CreateWindowSurface(const vk::Instance& instance,
 #endif
 }
 
-std::tuple<vk::UniqueDevice, int, int, int> CreateLogicalDevice(
+std::tuple<vk::UniqueDevice, std::map<vk::QueueFlagBits, int>>
+CreateLogicalDevice(
     const vk::PhysicalDevice& physical_device,
     const std::vector<vk::QueueFamilyProperties>& queue_family_properties,
-    const vk::SurfaceKHR& surface, bool enabled_debug_marker) {
-  int graphics_queue_index = -1;
-  int present_queue_index = -1;
-  int compute_queue_index = -1;
+    bool enabled_debug_marker) {
+  std::map<vk::QueueFlagBits, int> queue_index_table;
   for (int i = 0; i < queue_family_properties.size(); ++i) {
     auto& properties = queue_family_properties[i];
     if (properties.queueCount > 0) {
-      if (properties.queueFlags & vk::QueueFlagBits::eGraphics) {
-        graphics_queue_index = i;
+      if (properties.queueFlags & vk::QueueFlagBits::eGraphics &&
+          queue_index_table.find(vk::QueueFlagBits::eGraphics) ==
+              queue_index_table.end()) {
+        queue_index_table[vk::QueueFlagBits::eGraphics] = i;
       }
-      if (physical_device.getSurfaceSupportKHR(i, surface)) {
-        present_queue_index = i;
+      if (properties.queueFlags & vk::QueueFlagBits::eCompute &&
+          queue_index_table.find(vk::QueueFlagBits::eCompute) ==
+              queue_index_table.end()) {
+        queue_index_table[vk::QueueFlagBits::eCompute] = i;
       }
-      if (properties.queueFlags & vk::QueueFlagBits::eCompute) {
-        compute_queue_index = i;
+      if (properties.queueFlags & vk::QueueFlagBits::eTransfer &&
+          queue_index_table.find(vk::QueueFlagBits::eTransfer) ==
+              queue_index_table.end()) {
+        queue_index_table[vk::QueueFlagBits::eTransfer] = i;
       }
-    }
-    if (graphics_queue_index != -1 && present_queue_index != -1 &&
-        compute_queue_index != -1) {
-      break;
     }
   }
 
-  if (graphics_queue_index == -1 || present_queue_index == -1) {
+  if (queue_index_table.find(vk::QueueFlagBits::eGraphics) ==
+      queue_index_table.end()) {
     TEMP_LOG_ERROR("Not found queue family.");
-    return std::forward_as_tuple(vk::UniqueDevice(), -1, -1, -1);
+    return std::forward_as_tuple(vk::UniqueDevice(), queue_index_table);
   }
+
+  auto graphics_queue_index = queue_index_table[vk::QueueFlagBits::eGraphics];
 
   std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
   {
@@ -207,38 +212,45 @@ std::tuple<vk::UniqueDevice, int, int, int> CreateLogicalDevice(
         queue_family_properties[graphics_queue_index].queueCount;
     std::vector<float> queue_priorities;
     for (int i = 0; i < graphics_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f - 0.1f * i);
+      queue_priorities.emplace_back(1.0f);
     }
     graphics_queue_create_info.pQueuePriorities = queue_priorities.data();
     queue_create_infos.emplace_back(graphics_queue_create_info);
   }
 
-  if (graphics_queue_index != present_queue_index) {
-    vk::DeviceQueueCreateInfo present_queue_create_info;
-    present_queue_create_info.queueFamilyIndex = present_queue_index;
-    present_queue_create_info.queueCount =
-        queue_family_properties[present_queue_index].queueCount;
-    std::vector<float> queue_priorities;
-    for (int i = 0; i < present_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f - 0.1f * i);
-    }
-    present_queue_create_info.pQueuePriorities = queue_priorities.data();
-    queue_create_infos.emplace_back(present_queue_create_info);
-  }
-
+  auto iter = queue_index_table.find(vk::QueueFlagBits::eCompute);
+  auto compute_queue_index =
+      iter != queue_index_table.end() ? iter->second : -1;
   if (compute_queue_index != -1 &&
-      graphics_queue_index != compute_queue_index &&
-      present_queue_index != compute_queue_index) {
+      graphics_queue_index != compute_queue_index) {
     vk::DeviceQueueCreateInfo compute_queue_create_info;
     compute_queue_create_info.queueFamilyIndex = compute_queue_index;
     compute_queue_create_info.queueCount =
         queue_family_properties[compute_queue_index].queueCount;
     std::vector<float> queue_priorities;
     for (int i = 0; i < compute_queue_create_info.queueCount; ++i) {
-      queue_priorities.emplace_back(1.0f - 0.1f * i);
+      queue_priorities.emplace_back(1.0f);
     }
     compute_queue_create_info.pQueuePriorities = queue_priorities.data();
     queue_create_infos.emplace_back(compute_queue_create_info);
+  }
+
+  iter = queue_index_table.find(vk::QueueFlagBits::eTransfer);
+  auto transfer_queue_index =
+      iter != queue_index_table.end() ? iter->second : -1;
+  if (transfer_queue_index != -1 &&
+      graphics_queue_index != transfer_queue_index &&
+      compute_queue_index != transfer_queue_index) {
+    vk::DeviceQueueCreateInfo transfer_queue_create_info;
+    transfer_queue_create_info.queueFamilyIndex = transfer_queue_index;
+    transfer_queue_create_info.queueCount =
+        queue_family_properties[transfer_queue_index].queueCount;
+    std::vector<float> queue_priorities;
+    for (int i = 0; i < transfer_queue_create_info.queueCount; ++i) {
+      queue_priorities.emplace_back(1.0f);
+    }
+    transfer_queue_create_info.pQueuePriorities = queue_priorities.data();
+    queue_create_infos.emplace_back(transfer_queue_create_info);
   }
 
   vk::DeviceCreateInfo device_create_info;
@@ -275,8 +287,75 @@ std::tuple<vk::UniqueDevice, int, int, int> CreateLogicalDevice(
   device_create_info.ppEnabledExtensionNames = device_extensions.data();
 
   auto device = physical_device.createDeviceUnique(device_create_info);
-  return std::forward_as_tuple(std::move(device), graphics_queue_index,
-                               present_queue_index, compute_queue_index);
+  return std::forward_as_tuple(std::move(device), queue_index_table);
+}
+
+vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
+    vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
+    const vk::Extent2D& extent, vk::Format color_format,
+    vk::ColorSpaceKHR color_space, vk::SwapchainKHR old_swap_chain) {
+  auto surf_caps = physical_device.getSurfaceCapabilitiesKHR(surface);
+
+  vk::Extent2D swapchain_extent;
+  if (surf_caps.currentExtent.width == -1) {
+    swapchain_extent = extent;
+  } else {
+    swapchain_extent = surf_caps.currentExtent;
+  }
+
+  uint32_t desired_number_of_swapchain_images = surf_caps.minImageCount + 1;
+  if ((surf_caps.maxImageCount > 0) &&
+      (desired_number_of_swapchain_images > surf_caps.maxImageCount)) {
+    desired_number_of_swapchain_images = surf_caps.maxImageCount;
+  }
+
+  vk::SurfaceTransformFlagBitsKHR pre_transform;
+  if (surf_caps.supportedTransforms &
+      vk::SurfaceTransformFlagBitsKHR::eIdentity) {
+    pre_transform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+  } else {
+    pre_transform = surf_caps.currentTransform;
+  }
+
+  std::vector<vk::PresentModeKHR> present_modes =
+      physical_device.getSurfacePresentModesKHR(surface);
+  auto present_mode_count = present_modes.size();
+
+  vk::PresentModeKHR present_mode = vk::PresentModeKHR::eFifo;
+
+  auto iter = std::find(present_modes.begin(), present_modes.end(),
+                        vk::PresentModeKHR::eMailbox);
+
+  if (iter != present_modes.end()) {
+    present_mode = vk::PresentModeKHR::eMailbox;
+  } else {
+    iter = std::find(present_modes.begin(), present_modes.end(),
+                     vk::PresentModeKHR::eImmediate);
+    if (iter != present_modes.end()) {
+      present_mode = vk::PresentModeKHR::eImmediate;
+    }
+  }
+
+  vk::SwapchainCreateInfoKHR create_info;
+  create_info.surface = surface;
+  create_info.minImageCount = desired_number_of_swapchain_images;
+  create_info.imageFormat = color_format;
+  create_info.imageColorSpace = color_space;
+  create_info.imageExtent =
+      vk::Extent2D{swapchain_extent.width, swapchain_extent.height};
+  create_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
+                           vk::ImageUsageFlagBits::eTransferDst;
+  create_info.preTransform = pre_transform;
+  create_info.imageArrayLayers = 1;
+  create_info.imageSharingMode = vk::SharingMode::eExclusive;
+  create_info.queueFamilyIndexCount = 0;
+  create_info.pQueueFamilyIndices = nullptr;
+  create_info.presentMode = present_mode;
+  create_info.oldSwapchain = old_swap_chain;
+  create_info.clipped = VK_TRUE;
+  create_info.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+
+  return create_info;
 }
 }  // namespace tvk
 }  // namespace gfx

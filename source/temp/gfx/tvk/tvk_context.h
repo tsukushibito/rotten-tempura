@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -16,7 +17,12 @@ class Context {
   Context(const void* window);
 
  public:
+  const vk::Instance& instance() const { return *instance_; }
+
   std::vector<vk::Format> GetSupportedDepthFormats() const;
+
+  vk::PhysicalDevice physical_device() const { return physical_device_; }
+  vk::Device device() const { return *device_; }
 
  private:
   vk::DispatchLoaderDynamic dispatcher_;
@@ -31,18 +37,12 @@ class Context {
   vk::PhysicalDeviceMemoryProperties device_memory_properties_;
 
   std::vector<vk::QueueFamilyProperties> queue_family_properties_;
-  int graphics_queue_index_ = -1;
-  int present_queue_index_ = -1;
-  int compute_queue_index_ = -1;
+  std::map<vk::QueueFlagBits, int> queue_index_table_;
 
   vk::UniqueDevice device_;
 
   vk::UniquePipelineCache pipeline_cache_;
-  vk::Queue graphics_queue_;
-  vk::Queue present_queue_;
-  vk::Queue compute_queue_;
-
-  vk::UniqueSurfaceKHR surface_;
+  std::map<vk::QueueFlagBits, vk::Queue> queue_table_;
 
   vk::DebugReportCallbackEXT msg_callback_;
 };
