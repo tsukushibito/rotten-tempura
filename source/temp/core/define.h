@@ -15,7 +15,7 @@
 #define TEMP_GFX_API_OPENGL
 #define TEMP_GFX_API_D3D12
 #define TEMP_GFX_API_D3D11
-#pragma warning(disable : 4566)
+// #pragma warning(disable : 4566)
 #endif
 
 #elif defined __APPLE__

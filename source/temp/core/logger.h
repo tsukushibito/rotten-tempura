@@ -10,7 +10,9 @@
 #include "temp/core/define.h"
 
 #ifdef TEMP_PLATFORM_WINDOWS
-#define FILE (strrchr(__FILE__, '¥¥') ? strrchr(__FILE__, '¥¥') + 1 : __FILE__)
+#include <Windows.h>
+#include <sstream>
+#define FILE (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #else
 #define FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif
@@ -21,23 +23,15 @@ namespace temp {
 namespace core {
 
 #ifdef TEMP_PLATFORM_WINDOWS
-class DebugStreamBuf : public std::streambuf {
+class DebugStreamBuf : public std::stringbuf {
  public:
-  virtual int_type overflow(int_type c) override {
-    if (c != traits_type::eof()) {
-      buf_ += c;
+  ~DebugStreamBuf() { sync(); }
 
-      // 改行コードが来た時に出力する。
-      if (c == '\n') {
-        OutputDebugStringA(buf_.c_str());
-        buf_.clear();
-      }
-    }
-    return c;
+  int sync() override {
+    OutputDebugStringA(str().c_str());
+    str("");
+    return 0;
   }
-
- private:
-  std::string buf_;
 };
 
 extern std::ostream dout;
@@ -99,11 +93,19 @@ class Logger {
   }
 
  private:
-  static void log__() { std::cout << std::endl; }
+  static void log__() {
+    std::cout << std::endl;
+#ifdef TEMP_PLATFORM_WINDOWS
+    dout << std::endl;
+#endif
+  }
 
   template <class T, class... Args>
   static void log__(T&& arg, Args&&... args) {
     std::cout << arg;
+#ifdef TEMP_PLATFORM_WINDOWS
+    dout << arg;
+#endif
     log__(std::forward<Args>(args)...);
   }
 
