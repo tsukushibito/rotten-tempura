@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <mutex>
+#include <streambuf>
 #include <utility>
 
 #include "temp/core/define.h"
@@ -18,6 +19,29 @@
 
 namespace temp {
 namespace core {
+
+#ifdef TEMP_PLATFORM_WINDOWS
+class DebugStreamBuf : public std::streambuf {
+ public:
+  virtual int_type overflow(int_type c) override {
+    if (c != traits_type::eof()) {
+      buf_ += c;
+
+      // 改行コードが来た時に出力する。
+      if (c == '\n') {
+        OutputDebugStringA(buf_.c_str());
+        buf_.clear();
+      }
+    }
+    return c;
+  }
+
+ private:
+  std::string buf_;
+};
+
+extern std::ostream dout;
+#endif
 
 class Logger {
  public:

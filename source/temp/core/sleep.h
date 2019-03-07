@@ -9,12 +9,13 @@
 namespace temp {
 namespace core {
 
-void sleep(int ms);
-
+inline void sleep(int ms) {
 #ifdef TEMP_PLATFORM_WINDOWS
-inline void sleep(int ms) { ::Sleep(ms); }
+  ::Sleep(ms);
 #else
-inline void sleep(int ms) { ::usleep(1000 * ms); }
+  ::usleep(1000 * ms);
 #endif
+}
+
 }  // namespace core
 }  // namespace temp
