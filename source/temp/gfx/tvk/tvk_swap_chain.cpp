@@ -19,10 +19,13 @@ TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
   surface_ = CreateWindowSurface(vk_instance, window);
 
   auto extent = vk::Extent2D(width, height);
-  create_info_ = SetupSwapchainCreateInfo(vk_physical_device, *surface_, extent,
-                                          vk::SwapchainKHR());
+  swap_chain_ci_ = SetupSwapchainCreateInfo(vk_physical_device, *surface_,
+                                            extent, vk::SwapchainKHR());
 
-  swap_chain_ = vk_device.createSwapchainKHRUnique(create_info_);
+  swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
+
+  vk::SemaphoreCreateInfo semaphore_ci;
+  present_complete_semaphore_ = vk_device.createSemaphoreUnique(semaphore_ci);
 }
 
 void TvkSwapChain::Present(const Device* device) const {
@@ -39,19 +42,35 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
 
-  create_info_.imageExtent.width = width;
-  create_info_.imageExtent.width = height;
-  create_info_.oldSwapchain = *swap_chain_;
+  swap_chain_ci_.imageExtent.width = width;
+  swap_chain_ci_.imageExtent.width = height;
+  swap_chain_ci_.oldSwapchain = *swap_chain_;
 
-  swap_chain_ = vk_device.createSwapchainKHRUnique(create_info_);
-  if (create_info_.oldSwapchain != vk::SwapchainKHR()) {
+  swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
+  if (swap_chain_ci_.oldSwapchain != vk::SwapchainKHR()) {
     for (auto&& image : images_) {
       vk_device.destroyImageView(image.view);
     }
   }
 }
 
-void TvkSwapChain::CreateSwapChain() const {}
+std::uint32_t TvkSwapChain::AcquireNextImage(const Device* device) {
+  auto tvk_device = static_cast<const TvkDevice*>(device);
+  auto vk_physical_device = tvk_device->physical_device();
+  auto vk_device = tvk_device->device();
+
+  auto result_value = vk_device.acquireNextImageKHR(
+      *swap_chain_, std::numeric_limits<uint64_t>::max(),
+      *present_complete_semaphore_, vk::Fence());
+
+  auto result = result_value.result;
+  if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
+    throw std::error_code(result);
+  }
+  current_image_ = result_value.value;
+  return current_image_;
+}
+
 }  // namespace tvk
 }  // namespace gfx
 }  // namespace temp

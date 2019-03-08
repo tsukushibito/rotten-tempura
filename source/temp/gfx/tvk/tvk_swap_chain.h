@@ -34,18 +34,18 @@ class TvkSwapChain : public SwapChain {
   void Resize(const Device* device, std::uint32_t width,
               std::uint32_t height) override;
 
- private:
-  void CreateSwapChain() const;
+  std::uint32_t AcquireNextImage(const Device* device);
 
+ private:
   vk::UniqueSurfaceKHR surface_;
   vk::Format color_format_;
   vk::ColorSpaceKHR color_space_;
-  vk::SwapchainCreateInfoKHR create_info_;
+  vk::SwapchainCreateInfoKHR swap_chain_ci_;
   vk::UniqueSwapchainKHR swap_chain_;
+  vk::UniqueSemaphore present_complete_semaphore_;
+  std::uint32_t current_image_;
   std::vector<Image> images_;
   vk::Queue queue_;
-
-  int current_image_ = 0;
 };
 
 }  // namespace tvk

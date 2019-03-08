@@ -1,4 +1,4 @@
-﻿#import <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
 #include <future>
@@ -19,15 +19,38 @@
 }
 @end
 
-@interface WindowDelegate : NSObject<NSWindowDelegate> {
-}
+@interface WindowDelegate : NSObject<NSWindowDelegate>
+@property (assign) NSWindow* window;
 - (void)windowWillClose:(NSNotification*)notification;
+- (void)windowDidResize:(NSNotification*)notification;
 @end
 
 @implementation WindowDelegate
+
+temp::app::OnResizeWindow* on_resize_window_;
+
+- (id)init {
+    if (self = [super init]) {
+        on_resize_window_ = nullptr;
+    }
+    return self;
+}
+
+- (void)setOnResizeWindow: (temp::app::OnResizeWindow*)on_resize_window {
+    on_resize_window_ = on_resize_window;
+}
+
 - (void)windowWillClose:(NSNotification*)notification {
     [NSApp stop:(NSApp)];
 }
+
+- (void)windowDidResize:(NSNotification *)notification {
+    if(on_resize_window_ != nullptr) {
+        auto rect = _window.contentView.frame;
+        (*on_resize_window_)((std::uint32_t)rect.size.width, (std::uint32_t)rect.size.height);
+    }
+}
+
 @end
 
 namespace temp {
@@ -53,14 +76,17 @@ MacApplication::MacApplication()
 
     properties_->exit_flag = 0;
 
-    auto delegate = [[WindowDelegate alloc] init];
     properties_->window = [[NSWindow alloc]
         initWithContentRect:NSMakeRect(0, 0, 1080, 720)
                     styleMask:NSWindowStyleMaskTitled
                             | NSWindowStyleMaskMiniaturizable
                             | NSWindowStyleMaskClosable
+                            | NSWindowStyleMaskResizable
                     backing:NSBackingStoreBuffered
                         defer:NO];
+    auto delegate = [[WindowDelegate alloc] init];
+    delegate.window = properties_->window;
+    [delegate setOnResizeWindow:&on_resize_window()];
     [properties_->window setTitle:@"てんぷら"];
     [properties_->window center];
     [properties_->window setDelegate:delegate];
