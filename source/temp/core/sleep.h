@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "temp/core/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
+#define NOMINMAX
 #include <Windows.h>
 #else
 #include <unistd.h>

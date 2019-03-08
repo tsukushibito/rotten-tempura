@@ -11,6 +11,19 @@ namespace windows {
 namespace {
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   switch (msg) {
+  case WM_CREATE: {
+      auto cp = (CREATESTRUCT*)lp;
+      SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)cp->lpCreateParams);
+      return 0;
+    }
+    case WM_SIZE: {
+      RECT rect;
+      GetClientRect(hwnd, &rect);
+      auto app = (WindowsApplication*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+      auto on_resize = app->on_resize_window();
+      on_resize(rect.right - rect.left, rect.bottom - rect.top);
+      return 0;
+    }
     case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
@@ -39,7 +52,7 @@ WindowsApplication::WindowsApplication() {
 
   RegisterClassEx(&wndclass);
 
-  DWORD style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+  DWORD style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX;
   RECT window_rect = {
       0,
       0,
@@ -51,7 +64,7 @@ WindowsApplication::WindowsApplication() {
   LONG window_height = window_rect.bottom - window_rect.top;
   HWND hwnd = CreateWindow("TempuraWindow", "てんぷら", style, CW_USEDEFAULT,
                            CW_USEDEFAULT, window_width, window_height, NULL,
-                           NULL, instance_handle, NULL);
+                           NULL, instance_handle, (LPVOID)this);
 
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
@@ -94,7 +107,6 @@ void WindowsApplication::Exit() {
   HWND hwnd = reinterpret_cast<HWND>(native_window_handle_);
   SendMessage(hwnd, WM_QUIT, 0, 0);
 }
-
 
 }  // namespace windows
 }  // namespace app
