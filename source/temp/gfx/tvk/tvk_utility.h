@@ -14,9 +14,11 @@ vk::UniqueInstance CreateInstance(const std::string& app_name,
                                   const std::string& engine_name,
                                   bool enabled_validation);
 
-vk::DebugReportCallbackEXT SetupDebugging(
-    const vk::Instance& instance, const vk::DebugReportFlagsEXT& flags,
-    const vk::DispatchLoaderDynamic& dispatcher);
+vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
+SetupDebugging(const vk::Instance& instance,
+               const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags,
+               const vk::DebugUtilsMessageTypeFlagsEXT type_flags,
+               const vk::DispatchLoaderDynamic& dispatcher);
 
 vk::PhysicalDevice PickPhysicalDevices(
     const std::vector<vk::PhysicalDevice>& physical_devices);

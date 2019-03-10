@@ -12,8 +12,10 @@ class TvkSwapChain : public SwapChain {
  public:
   struct Image {
     vk::Image image;
-    vk::ImageView view;
-    vk::Fence fence;
+    vk::UniqueImageView view;
+    vk::UniqueSemaphore acquire_image_semaphore;
+    vk::UniqueSemaphore render_semaphore;
+    vk::UniqueFence fence;
   };
 
   explicit TvkSwapChain(const TvkDevice& device, const void* window,
@@ -42,10 +44,8 @@ class TvkSwapChain : public SwapChain {
   vk::ColorSpaceKHR color_space_;
   vk::SwapchainCreateInfoKHR swap_chain_ci_;
   vk::UniqueSwapchainKHR swap_chain_;
-  vk::UniqueSemaphore present_complete_semaphore_;
   std::uint32_t current_image_;
   std::vector<Image> images_;
-  vk::Queue queue_;
 };
 
 }  // namespace tvk

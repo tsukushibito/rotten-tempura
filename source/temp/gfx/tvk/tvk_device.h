@@ -13,8 +13,9 @@ class Context;
 
 class TvkDevice : public Device {
  public:
-  TvkDevice() : TvkDevice(nullptr) {}
-  explicit TvkDevice(const void* window);
+  TvkDevice() : TvkDevice(nullptr, 0, 0) {}
+  explicit TvkDevice(const void* window, std::uint32_t window_width,
+                     std::uint32_t window_height);
 
   ~TvkDevice();
 
@@ -27,7 +28,7 @@ class TvkDevice : public Device {
  public:
   ApiType api_type() const override { return ApiType::kVulkan; }
 
-  SwapChain& main_swap_chain() const override { return *main_swap_chain_; }
+  SwapChain* main_swap_chain() const override { return main_swap_chain_.get(); }
 
   std::unique_ptr<SwapChain> CreateSwapChain(
       const void* window, std::uint32_t width,

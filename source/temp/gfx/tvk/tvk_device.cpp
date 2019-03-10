@@ -12,9 +12,10 @@ namespace temp {
 namespace gfx {
 namespace tvk {
 
-TvkDevice::TvkDevice(const void* window)
+TvkDevice::TvkDevice(const void* window, std::uint32_t window_width,
+                     std::uint32_t window_height)
     : context_(std::make_unique<Context>(window)) {
-  auto surface = CreateWindowSurface(context_->instance(), window);
+  main_swap_chain_ = CreateSwapChain(window, window_width, window_height);
 }
 
 TvkDevice::~TvkDevice() {}

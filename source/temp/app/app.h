@@ -5,3 +5,4 @@
 #elif defined(TEMP_PLATFORM_WINDOWS)
 #include "temp/app/windows/windows_application.h"
 #endif
+#include "temp/app/utility.h"

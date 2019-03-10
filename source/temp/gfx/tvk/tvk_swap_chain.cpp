@@ -10,6 +10,37 @@ namespace temp {
 namespace gfx {
 namespace tvk {
 
+namespace {
+std::vector<TvkSwapChain::Image> CreateSwapChainImages(
+    vk::Device device, vk::SwapchainKHR swap_chain, vk::Format image_format) {
+  using Image = TvkSwapChain::Image;
+
+  vk::ImageViewCreateInfo image_view_ci;
+  image_view_ci.format = image_format;
+  image_view_ci.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+  image_view_ci.subresourceRange.levelCount = 1;
+  image_view_ci.subresourceRange.layerCount = 1;
+  image_view_ci.viewType = vk::ImageViewType::e2D;
+
+  vk::SemaphoreCreateInfo semaphore_ci;
+  vk::FenceCreateInfo fence_ci;
+
+  std::vector<Image> images;
+  auto swap_chain_images = device.getSwapchainImagesKHR(swap_chain);
+  for (auto image : swap_chain_images) {
+    image_view_ci.image = image;
+    auto view = device.createImageViewUnique(image_view_ci);
+    auto acquire_image_semaphore = device.createSemaphoreUnique(semaphore_ci);
+    auto render_semaphore = device.createSemaphoreUnique(semaphore_ci);
+    auto fence = device.createFenceUnique(fence_ci);
+    images.emplace_back(Image{image, std::move(view),
+                              std::move(acquire_image_semaphore),
+                              std::move(render_semaphore), std::move(fence)});
+  }
+  return images;
+}
+}  // namespace
+
 TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
                            std::uint32_t width, std::uint32_t height) {
   auto vk_instance = device.instance();
@@ -17,17 +48,20 @@ TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
   auto vk_device = device.device();
   auto graphics_queue_index = device.graphics_queue_index();
 
+  // Create target windows's surface.
   surface_ = CreateWindowSurface(vk_instance, window);
 
+  // Cache SwapchainCreateInfo to reuse in resizing.
   auto extent = vk::Extent2D(width, height);
   swap_chain_ci_ =
       SetupSwapchainCreateInfo(vk_physical_device, graphics_queue_index,
                                *surface_, extent, vk::SwapchainKHR());
 
+  // Create swapchain.
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
 
-  vk::SemaphoreCreateInfo semaphore_ci;
-  present_complete_semaphore_ = vk_device.createSemaphoreUnique(semaphore_ci);
+  images_ = CreateSwapChainImages(vk_device, *swap_chain_,
+                                  swap_chain_ci_.imageFormat);
 }
 
 void TvkSwapChain::Present(const Device* device) const {
@@ -48,11 +82,26 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
   swap_chain_ci_.imageExtent.width = height;
   swap_chain_ci_.oldSwapchain = *swap_chain_;
 
+  auto old_image_count = vk_device.getSwapchainImagesKHR(*swap_chain_).size();
+
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
   if (swap_chain_ci_.oldSwapchain != vk::SwapchainKHR()) {
     for (auto&& image : images_) {
-      vk_device.destroyImageView(image.view);
+      image.view.reset();
+      vk_device.destroyImage(image.image);
     }
+  }
+
+  auto images = vk_device.getSwapchainImagesKHR(*swap_chain_);
+  if (images.size() != old_image_count) {
+    std::vector<vk::Fence> fences;
+    for (auto&& image : images_) {
+      fences.emplace_back(*image.fence);
+    }
+    vk_device.waitForFences(fences, true,
+                            std::numeric_limits<std::uint64_t>::max());
+    images_ = CreateSwapChainImages(vk_device, *swap_chain_,
+                                    swap_chain_ci_.imageFormat);
   }
 }
 
@@ -63,7 +112,8 @@ std::uint32_t TvkSwapChain::AcquireNextImage(const Device* device) {
 
   auto result_value = vk_device.acquireNextImageKHR(
       *swap_chain_, std::numeric_limits<uint64_t>::max(),
-      *present_complete_semaphore_, vk::Fence());
+      *images_[current_image_].acquire_image_semaphore,
+      *images_[current_image_].fence);
 
   auto result = result_value.result;
   if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {

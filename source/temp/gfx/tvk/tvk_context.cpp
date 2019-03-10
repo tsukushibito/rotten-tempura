@@ -22,12 +22,17 @@ Context::Context(const void* window) {
 
   dispatcher_.init(*instance_);
 
-  auto flags = vk::DebugReportFlagBitsEXT::eInformation |
-               vk::DebugReportFlagBitsEXT::eWarning |
-               vk::DebugReportFlagBitsEXT::ePerformanceWarning |
-               vk::DebugReportFlagBitsEXT::eError |
-               vk::DebugReportFlagBitsEXT::eDebug;
-  msg_callback_ = SetupDebugging(*instance_, flags, dispatcher_);
+  // TODO: Set from config file.
+  auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+                  vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+                  vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+                  vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
+  // auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+  //                 vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
+  auto type = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+              vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+              vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
+  messenger_ = SetupDebugging(*instance_, severity, type, dispatcher_);
 
   physical_devices_ = instance_->enumeratePhysicalDevices();
   physical_device_ = PickPhysicalDevices(physical_devices_);

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "temp/core/assertion.h"
 #include "temp/core/logger.h"
 
 #include "temp/gfx/tvk/tvk_utility.h"
@@ -50,22 +51,44 @@ std::vector<const char*> FilterLayers(
   return result;
 }
 
-VkBool32 MessageCallback(VkDebugReportFlagsEXT flags,
-                         VkDebugReportObjectTypeEXT obj_type,
-                         uint64_t src_object, size_t location, int32_t msg_code,
-                         const char* layer_prefix, const char* msg,
-                         void* user_data) {
+VkBool32 MessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                         VkDebugUtilsMessageTypeFlagsEXT type,
+                         const VkDebugUtilsMessengerCallbackDataEXT* data,
+                         void* pUserData) {
   std::stringstream ss;
-  ss << "[" << layer_prefix << "] Code " << msg_code << " : " << msg;
 
-  if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-    TEMP_LOG_ERROR(ss.str());
-  } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-    TEMP_LOG_WARNING(ss.str());
-  } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-    TEMP_LOG_INFO(ss.str());
-  } else {
-    return false;
+  std::string prefix;
+  if (type & VkDebugUtilsMessageTypeFlagBitsEXT::
+                 VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) {
+    prefix += "[GENERAL]";
+  }
+  if (type & VkDebugUtilsMessageTypeFlagBitsEXT::
+                 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
+    prefix += "[PERFORMANCE]";
+  }
+  if (type & VkDebugUtilsMessageTypeFlagBitsEXT::
+                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) {
+    prefix += "[VALIDATION]";
+  }
+
+  ss << prefix << "message: " << data->pMessage;
+
+  switch (severity) {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+      TEMP_LOG_ERROR(ss.str());
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+      TEMP_LOG_WARNING(ss.str());
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+      TEMP_LOG_INFO(ss.str());
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+      TEMP_LOG_TRACE(ss.str());
+      break;
+    default:
+      TEMP_ASSERT(false, "severity must be error, warning, info or verbose.");
+      return false;
   }
 
   return false;
@@ -105,7 +128,7 @@ vk::UniqueInstance CreateInstance(const std::string& app_name,
   instanceCreateInfo.pApplicationInfo = &appInfo;
   if (instanceExtensions.size() > 0) {
     if (enabled_validation) {
-      instanceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+      instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
     instanceCreateInfo.enabledExtensionCount =
         (uint32_t)instanceExtensions.size();
@@ -121,13 +144,17 @@ vk::UniqueInstance CreateInstance(const std::string& app_name,
   return vk::createInstanceUnique(instanceCreateInfo, nullptr);
 }
 
-vk::DebugReportCallbackEXT SetupDebugging(
-    const vk::Instance& instance, const vk::DebugReportFlagsEXT& flags,
-    const vk::DispatchLoaderDynamic& dispatcher) {
-  vk::DebugReportCallbackCreateInfoEXT info = {};
-  info.pfnCallback = (PFN_vkDebugReportCallbackEXT)MessageCallback;
-  info.flags = flags;
-  return instance.createDebugReportCallbackEXT(info, nullptr, dispatcher);
+vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
+SetupDebugging(const vk::Instance& instance,
+               const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags,
+               const vk::DebugUtilsMessageTypeFlagsEXT type_flags,
+               const vk::DispatchLoaderDynamic& dispatcher) {
+  vk::DebugUtilsMessengerCreateInfoEXT messenger_ci;
+  messenger_ci.messageSeverity = severity_flags;
+  messenger_ci.messageType = type_flags;
+  messenger_ci.pfnUserCallback = MessageCallback;
+  return instance.createDebugUtilsMessengerEXTUnique(messenger_ci, nullptr,
+                                                     dispatcher);
 }
 
 vk::PhysicalDevice PickPhysicalDevices(

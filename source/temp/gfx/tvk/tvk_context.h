@@ -49,7 +49,7 @@ class Context {
   vk::UniquePipelineCache pipeline_cache_;
   std::map<vk::QueueFlagBits, vk::Queue> queue_table_;
 
-  vk::DebugReportCallbackEXT msg_callback_;
+  vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> messenger_;
 };
 }  // namespace tvk
 }  // namespace gfx

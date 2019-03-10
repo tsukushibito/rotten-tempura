@@ -14,7 +14,10 @@ int main(int argc, char* argv[]) {
     TEMP_LOG_TRACE("On window resize. (", w, ", ", h, ")");
   };
   auto window = application.native_window_handle();
-  auto device = gfx::CreateDevice(gfx::ApiType::kVulkan, window);
+  auto window_size = app::GetWindowViewSize(window);
+  auto device = gfx::CreateDevice(gfx::ApiType::kVulkan, window,
+                                  window_size.width, window_size.height);
+  auto swap_chain = device->main_swap_chain();
 
   application.Run();
 
