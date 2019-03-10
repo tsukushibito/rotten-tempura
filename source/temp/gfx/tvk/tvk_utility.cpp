@@ -297,8 +297,17 @@ CreateLogicalDevice(
 }
 
 vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
-    vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
-    const vk::Extent2D& extent, vk::SwapchainKHR old_swap_chain) {
+    vk::PhysicalDevice physical_device, int graphics_queue_index,
+    vk::SurfaceKHR surface, const vk::Extent2D& extent,
+    vk::SwapchainKHR old_swap_chain) {
+  auto support =
+      physical_device.getSurfaceSupportKHR(graphics_queue_index, surface);
+  if (support == VK_FALSE) {
+    TEMP_LOG_ERROR("Graphics queue isn't supported surface. index: ",
+                   graphics_queue_index);
+    return vk::SwapchainCreateInfoKHR();
+  }
+
   auto surf_caps = physical_device.getSurfaceCapabilitiesKHR(surface);
 
   vk::Extent2D swapchain_extent;

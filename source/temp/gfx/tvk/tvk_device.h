@@ -39,6 +39,15 @@ class TvkDevice : public Device {
   }
   vk::Device device() const { return context_->device(); }
 
+  int graphics_queue_index() const {
+    auto iter =
+        context_->queue_index_table().find(vk::QueueFlagBits::eGraphics);
+    if (iter == context_->queue_index_table().end()) {
+      return -1;
+    }
+    return iter->second;
+  }
+
  private:
   std::unique_ptr<Context> context_;
   std::unique_ptr<SwapChain> main_swap_chain_;

@@ -22,7 +22,12 @@ class Context {
   std::vector<vk::Format> GetSupportedDepthFormats() const;
 
   vk::PhysicalDevice physical_device() const { return physical_device_; }
+
   vk::Device device() const { return *device_; }
+
+  const std::map<vk::QueueFlagBits, int>& queue_index_table() const {
+    return queue_index_table_;
+  }
 
  private:
   vk::DispatchLoaderDynamic dispatcher_;

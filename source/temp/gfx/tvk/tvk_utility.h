@@ -31,8 +31,9 @@ CreateLogicalDevice(
     bool enabled_debug_marker);
 
 vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
-    vk::PhysicalDevice physical_device, vk::SurfaceKHR surface,
-    const vk::Extent2D& extent, vk::SwapchainKHR old_swap_chain);
+    vk::PhysicalDevice physical_device, int graphics_queue_index,
+    vk::SurfaceKHR surface, const vk::Extent2D& extent,
+    vk::SwapchainKHR old_swap_chain);
 
 }  // namespace tvk
 }  // namespace gfx

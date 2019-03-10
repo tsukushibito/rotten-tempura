@@ -15,12 +15,14 @@ TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
   auto vk_instance = device.instance();
   auto vk_physical_device = device.physical_device();
   auto vk_device = device.device();
+  auto graphics_queue_index = device.graphics_queue_index();
 
   surface_ = CreateWindowSurface(vk_instance, window);
 
   auto extent = vk::Extent2D(width, height);
-  swap_chain_ci_ = SetupSwapchainCreateInfo(vk_physical_device, *surface_,
-                                            extent, vk::SwapchainKHR());
+  swap_chain_ci_ =
+      SetupSwapchainCreateInfo(vk_physical_device, graphics_queue_index,
+                               *surface_, extent, vk::SwapchainKHR());
 
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
 
