@@ -1,4 +1,7 @@
 #include "temp/core/define.h"
+#ifdef TEMP_PLATFORM_WINDOWS
+#define NOMINMAX
+#endif
 #ifdef TEMP_GFX_API_VULKAN
 
 #include "temp/gfx/tvk/tvk_context.h"

@@ -4,6 +4,7 @@
 #include "temp/core/define.h"
 
 #if defined(TEMP_PLATFORM_WINDOWS)
+#define NOMINMAX
 #include <Windows.h>
 #include <sstream>
 #endif
