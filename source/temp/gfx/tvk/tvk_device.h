@@ -25,7 +25,6 @@ class TvkDevice : public Device {
   TvkDevice(TvkDevice&& other) = default;
   TvkDevice& operator=(TvkDevice&& other) = default;
 
- public:
   ApiType api_type() const override { return ApiType::kVulkan; }
 
   SwapChain* main_swap_chain() const override { return main_swap_chain_.get(); }
