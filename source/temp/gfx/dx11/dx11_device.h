@@ -1,4 +1,8 @@
 ﻿#pragma once
+#include "temp/core/define.h"
+#ifdef TEMP_GFX_API_D3D11
+#include <d3d11.h>
+#include <wrl/client.h>
 
 #include <memory>
 
@@ -10,6 +14,9 @@ namespace dx11 {
 
 class Dx11Device : public Device {
  public:
+  template <class T>
+  using ComPtr = Microsoft::WRL::ComPtr<T>;
+
   Dx11Device() : Dx11Device(nullptr, 0, 0) {}
   explicit Dx11Device(const void* window, std::uint32_t window_width,
                       std::uint32_t window_height);
@@ -31,8 +38,10 @@ class Dx11Device : public Device {
       std::uint32_t height) const override;
 
  private:
+  ComPtr<ID3D11Device> device_;
   std::unique_ptr<SwapChain> main_swap_chain_;
 };
 }  // namespace dx11
 }  // namespace gfx
 }  // namespace temp
+#endif
