@@ -13,12 +13,14 @@
 #define NOMINMAX
 #include <Windows.h>
 #include <sstream>
-#define FILE (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define TEMP_FILE \
+  (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #else
-#define FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define TEMP_FILE \
+  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif
 
-#define TEMP_COUT (std::cout << FILE << "(" << __LINE__ << "): ")
+#define TEMP_COUT (std::cout << TEMP_FILE << "(" << __LINE__ << "): ")
 
 namespace temp {
 namespace core {
@@ -119,16 +121,16 @@ class Logger {
 }  // namespace temp
 
 #define TEMP_LOG_TRACE(...) \
-  temp::core::Logger::trace(FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::core::Logger::trace(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_DEBUG(...) \
-  temp::core::Logger::debug(FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::core::Logger::debug(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_INFO(...) \
-  temp::core::Logger::info(FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::core::Logger::info(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_WARNING(...) \
-  temp::core::Logger::warning(FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::core::Logger::warning(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_ERROR(...) \
-  temp::core::Logger::error(FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::core::Logger::error(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)

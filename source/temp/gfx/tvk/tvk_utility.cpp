@@ -360,7 +360,6 @@ vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
 
   std::vector<vk::PresentModeKHR> present_modes =
       physical_device.getSurfacePresentModesKHR(surface);
-  auto present_mode_count = present_modes.size();
 
   vk::PresentModeKHR present_mode = vk::PresentModeKHR::eFifo;
 

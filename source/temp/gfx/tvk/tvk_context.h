@@ -21,9 +21,8 @@ class Context {
 
   std::vector<vk::Format> GetSupportedDepthFormats() const;
 
-  vk::PhysicalDevice physical_device() const { return physical_device_; }
-
-  vk::Device device() const { return *device_; }
+  vk::PhysicalDevice physical_device() const;
+  vk::Device device() const;
 
   const std::map<vk::QueueFlagBits, int>& queue_index_table() const {
     return queue_index_table_;
@@ -49,7 +48,8 @@ class Context {
   vk::UniquePipelineCache pipeline_cache_;
   std::map<vk::QueueFlagBits, vk::Queue> queue_table_;
 
-  vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> messenger_;
+  vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
+      messenger_;
 };
 }  // namespace tvk
 }  // namespace gfx

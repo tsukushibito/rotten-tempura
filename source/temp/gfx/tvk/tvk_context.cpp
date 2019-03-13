@@ -92,6 +92,11 @@ std::vector<vk::Format> Context::GetSupportedDepthFormats() const {
 
   return supported;
 }
+
+vk::PhysicalDevice Context::physical_device() const { return physical_device_; }
+
+vk::Device Context::device() const { return *device_; }
+
 }  // namespace tvk
 }  // namespace gfx
 }  // namespace temp

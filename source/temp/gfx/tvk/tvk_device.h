@@ -9,8 +9,6 @@ namespace temp {
 namespace gfx {
 namespace tvk {
 
-class Context;
-
 class TvkDevice : public Device {
  public:
   TvkDevice() : TvkDevice(nullptr, 0, 0) {}
@@ -33,20 +31,12 @@ class TvkDevice : public Device {
       const void* window, std::uint32_t width,
       std::uint32_t height) const override;
 
-  vk::Instance instance() const { return context_->instance(); }
-  vk::PhysicalDevice physical_device() const {
-    return context_->physical_device();
-  }
-  vk::Device device() const { return context_->device(); }
+  vk::Instance instance() const;
+  vk::PhysicalDevice physical_device() const;
+  vk::Device device() const;
+  int graphics_queue_index() const;
 
-  int graphics_queue_index() const {
-    auto iter =
-        context_->queue_index_table().find(vk::QueueFlagBits::eGraphics);
-    if (iter == context_->queue_index_table().end()) {
-      return -1;
-    }
-    return iter->second;
-  }
+  const Context& context() const { return *context_; }
 
  private:
   std::unique_ptr<Context> context_;
