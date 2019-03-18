@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "temp/gfx/device.h"
+#include "temp/gfx/swap_chain.h"
 
 namespace temp {
 namespace gfx {

@@ -24,13 +24,18 @@ elseif(WIN32)
     add_definitions("-W4")
 endif(APPLE)
 
-set(TEMP_USE_BOOST ON CACHE BOOL "To use filesystem in a environment before c++17.")
+# set(TEMP_USE_BOOST ON CACHE BOOL "To use filesystem in a environment before c++17.")
 
-if(TEMP_USE_BOOST)
+# if(TEMP_USE_BOOST)
+    message("BOOST_ROOT: ${BOOST_ROOT}")
+    message("BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+    message("BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+    set (Boost_DETAILED_FAILURE_MSG ON)
     find_package(Boost COMPONENTS system filesystem unit_test_framework) 
     if(Boost_FOUND)
+        link_directories(${Boost_LIBRARY_DIRS})
     endif(Boost_FOUND)
-endif(TEMP_USE_BOOST)
+# endif(TEMP_USE_BOOST)
 
 
 add_subdirectory(temp)

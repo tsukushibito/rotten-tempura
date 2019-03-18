@@ -11,4 +11,8 @@ target_link_libraries(
     temp_gfx
 )
 
+if(Boost_FOUND)
+    target_link_libraries(temp_app_test ${Boost_LIBRARIES})
+endif(Boost_FOUND)
+
 source_group("temp_app_test" FILES "main.cpp")

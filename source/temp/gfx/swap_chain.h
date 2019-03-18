@@ -6,6 +6,7 @@
 
 namespace temp {
 namespace gfx {
+
 class SwapChain {
  protected:
   SwapChain() = default;

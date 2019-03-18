@@ -33,7 +33,9 @@
 
 # Visual Studio Code files
 .vscode/*
+.vs/*
 *.code-workspace
+
 
 build/
 
