@@ -296,6 +296,11 @@ class TestRenderer {
     graphics_queue.presentKHR(present_info);
   }
 
+  void Terminate() {
+    auto vk_device = tvk_device_->device();
+    vk_device.waitIdle();
+  }
+
  private:
   std::shared_ptr<gfx::tvk::TvkDevice> tvk_device_;
   vk::UniqueShaderModule vs_module_;
@@ -322,6 +327,7 @@ int main(int argc, char* argv[]) {
   TestRenderer renderer(gfx_device);
 
   application.on_update() = [&renderer]() { renderer.DrawFrame(); };
+  application.on_update() = [&renderer]() { renderer.Terminate(); };
 
   application.Run();
 
