@@ -62,7 +62,7 @@ class TestRenderer {
     vk::ShaderModuleCreateInfo fs_module_ci;
     fs_module_ci.codeSize = fs_code.size();
     fs_module_ci.pCode = (std::uint32_t*)fs_code.data();
-    auto fs_module_ = vk_device.createShaderModuleUnique(fs_module_ci);
+    fs_module_ = vk_device.createShaderModuleUnique(fs_module_ci);
 
     vk::PipelineShaderStageCreateInfo fs_stage_ci;
     fs_stage_ci.stage = vk::ShaderStageFlagBits::eFragment;
@@ -85,8 +85,8 @@ class TestRenderer {
     vk::Viewport viewport;
     viewport.x = 0;
     viewport.y = 0;
-    viewport.width = swap_chain->width();
-    viewport.height = swap_chain->height();
+    viewport.width = (float)swap_chain->width();
+    viewport.height = (float)swap_chain->height();
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
@@ -231,7 +231,7 @@ class TestRenderer {
     vk::CommandBufferAllocateInfo command_buffer_ai;
     command_buffer_ai.commandPool = *command_pool_;
     command_buffer_ai.level = vk::CommandBufferLevel::ePrimary;
-    command_buffer_ai.commandBufferCount = images.size();
+    command_buffer_ai.commandBufferCount = (std::uint32_t)images.size();
     command_buffers_ =
         vk_device.allocateCommandBuffersUnique(command_buffer_ai);
 
@@ -267,15 +267,15 @@ class TestRenderer {
     auto vk_device = tvk_device_->device();
     auto swap_chain = tvk_device_->main_swap_chain();
     auto tvk_swap_chain = static_cast<gfx::tvk::TvkSwapChain*>(swap_chain);
+    auto&& wait_semaphore = tvk_swap_chain->current_image().acquire_image_semaphore.get();
     auto image_index = tvk_swap_chain->AcquireNextImage(tvk_device_.get());
 
     auto& image = tvk_swap_chain->images()[image_index];
     vk::SubmitInfo submit_info;
-    vk::Semaphore wait_semaphores[] = {image.acquire_image_semaphore.get()};
     vk::PipelineStageFlags wait_stages[] = {
         vk::PipelineStageFlagBits::eColorAttachmentOutput};
     submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitSemaphores = &wait_semaphore;
     submit_info.pWaitDstStageMask = wait_stages;
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers = &(command_buffers_[image_index].get());
@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
   TestRenderer renderer(gfx_device);
 
   application.on_update() = [&renderer]() { renderer.DrawFrame(); };
-  application.on_update() = [&renderer]() { renderer.Terminate(); };
+  application.on_terminate() = [&renderer]() { renderer.Terminate(); };
 
   application.Run();
 

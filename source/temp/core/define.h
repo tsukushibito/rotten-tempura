@@ -15,6 +15,8 @@
 #define TEMP_GFX_API_OPENGL
 #define TEMP_GFX_API_D3D12
 #define TEMP_GFX_API_D3D11
+
+#define _USE_MATH_DEFINES   // for cmath pi
 #endif
 
 #elif defined __APPLE__

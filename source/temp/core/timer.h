@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cstdint>
+
 #include <chrono>
 
 namespace temp {
@@ -9,17 +11,17 @@ class Timer {
  public:
   Timer() : begin_(std::chrono::system_clock::now()) {}
 
-  float durationMs() const {
+  std::int64_t durationMs() const {
     using namespace std::chrono;
     return duration_cast<milliseconds>(system_clock::now() - begin_).count();
   }
 
-  float durationUs() const {
+  std::int64_t durationUs() const {
     using namespace std::chrono;
     return duration_cast<microseconds>(system_clock::now() - begin_).count();
   }
 
-  float durationNs() const {
+  std::int64_t durationNs() const {
     using namespace std::chrono;
     return duration_cast<nanoseconds>(system_clock::now() - begin_).count();
   }

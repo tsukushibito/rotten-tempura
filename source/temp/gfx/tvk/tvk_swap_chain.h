@@ -39,6 +39,10 @@ class TvkSwapChain : public SwapChain {
   std::uint32_t width() const override;
   std::uint32_t height() const override;
 
+  std::uint32_t current_image_index() const;
+
+  const Image& current_image() const;
+
   vk::Format color_format() const;
 
   vk::SwapchainKHR swap_chain() const;

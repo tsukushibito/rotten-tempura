@@ -3,7 +3,8 @@
 #define NOMINMAX
 #endif
 #ifdef TEMP_GFX_API_VULKAN
-
+#include <cassert>
+#include "temp/core/logger.h"
 #include "temp/gfx/tvk/tvk_context.h"
 #include "temp/gfx/tvk/tvk_device.h"
 #include "temp/gfx/tvk/tvk_swap_chain.h"
@@ -102,8 +103,14 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
     for (auto&& image : images_) {
       fences.emplace_back(*image.fence);
     }
+
     vk_device.waitForFences(fences, true,
                             std::numeric_limits<std::uint64_t>::max());
+
+    // for (auto&& image : images_) {
+    //     image.fence = vk_device.createFenceUnique(vk::FenceCreateInfo());
+    // }
+
     images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                     swap_chain_ci_.imageFormat);
   }
@@ -115,6 +122,13 @@ std::uint32_t TvkSwapChain::width() const {
 
 std::uint32_t TvkSwapChain::height() const {
   return swap_chain_ci_.imageExtent.height;
+}
+
+std::uint32_t TvkSwapChain::current_image_index() const {
+  return current_image_;
+}
+const TvkSwapChain::Image& TvkSwapChain::current_image() const {
+  return images_[current_image_];
 }
 
 vk::Format TvkSwapChain::color_format() const {
