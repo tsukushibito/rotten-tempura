@@ -23,10 +23,8 @@ class Context {
 
   vk::PhysicalDevice physical_device() const;
   vk::Device device() const;
-
-  const std::map<vk::QueueFlagBits, int>& queue_index_table() const {
-    return queue_index_table_;
-  }
+  const std::map<vk::QueueFlagBits, int>& queue_index_table() const;
+  const std::map<vk::QueueFlagBits, vk::Queue>& queue_table() const;
 
  private:
   vk::DispatchLoaderDynamic dispatcher_;
@@ -45,7 +43,6 @@ class Context {
 
   vk::UniqueDevice device_;
 
-  vk::UniquePipelineCache pipeline_cache_;
   std::map<vk::QueueFlagBits, vk::Queue> queue_table_;
 
   vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>

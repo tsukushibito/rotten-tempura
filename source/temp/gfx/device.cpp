@@ -9,14 +9,14 @@
 namespace temp {
 namespace gfx {
 
-std::unique_ptr<Device> CreateDevice(ApiType api, const void* window,
+std::shared_ptr<Device> CreateDevice(ApiType api, const void* window,
                                      std::uint32_t width,
                                      std::uint32_t height) {
-  std::unique_ptr<Device> device;
+  std::shared_ptr<Device> device;
   switch (api) {
 #ifdef TEMP_GFX_API_VULKAN
     case ApiType::kVulkan:
-      device = std::make_unique<tvk::TvkDevice>(window, width, height);
+      device = std::make_shared<tvk::TvkDevice>(window, width, height);
       break;
 #endif
     default:

@@ -20,6 +20,9 @@ class SwapChain {
 
   virtual void Resize(const Device* device, std::uint32_t width,
                       std::uint32_t height) = 0;
+
+  virtual std::uint32_t width() const = 0;
+  virtual std::uint32_t height() const = 0;
 };
 }  // namespace gfx
 }  // namespace temp

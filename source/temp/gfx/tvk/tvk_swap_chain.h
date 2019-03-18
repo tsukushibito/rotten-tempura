@@ -36,6 +36,15 @@ class TvkSwapChain : public SwapChain {
   void Resize(const Device* device, std::uint32_t width,
               std::uint32_t height) override;
 
+  std::uint32_t width() const override;
+  std::uint32_t height() const override;
+
+  vk::Format color_format() const;
+
+  vk::SwapchainKHR swap_chain() const;
+
+  const std::vector<Image>& images() const;
+
   std::uint32_t AcquireNextImage(const Device* device);
 
  private:
@@ -44,7 +53,7 @@ class TvkSwapChain : public SwapChain {
   vk::ColorSpaceKHR color_space_;
   vk::SwapchainCreateInfoKHR swap_chain_ci_;
   vk::UniqueSwapchainKHR swap_chain_;
-  std::uint32_t current_image_;
+  std::uint32_t current_image_ = 0;
   std::vector<Image> images_;
 };
 

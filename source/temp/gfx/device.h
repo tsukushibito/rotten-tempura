@@ -24,7 +24,7 @@ class Device {
       const void* window, std::uint32_t width, std::uint32_t height) const = 0;
 };
 
-std::unique_ptr<Device> CreateDevice(ApiType api, const void* window,
+std::shared_ptr<Device> CreateDevice(ApiType api, const void* window,
                                      std::uint32_t width, std::uint32_t height);
 
 }  // namespace gfx

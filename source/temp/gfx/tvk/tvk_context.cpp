@@ -53,9 +53,6 @@ Context::Context(const void* window) {
 
   dispatcher_.init(*instance_, *device_);
 
-  pipeline_cache_ =
-      device_->createPipelineCacheUnique(vk::PipelineCacheCreateInfo());
-
   queue_table_[vk::QueueFlagBits::eGraphics] =
       device_->getQueue(queue_index_table_[vk::QueueFlagBits::eGraphics], 0);
 
@@ -96,6 +93,14 @@ std::vector<vk::Format> Context::GetSupportedDepthFormats() const {
 vk::PhysicalDevice Context::physical_device() const { return physical_device_; }
 
 vk::Device Context::device() const { return *device_; }
+
+const std::map<vk::QueueFlagBits, int>& Context::queue_index_table() const {
+  return queue_index_table_;
+}
+
+const std::map<vk::QueueFlagBits, vk::Queue>& Context::queue_table() const {
+  return queue_table_;
+}
 
 }  // namespace tvk
 }  // namespace gfx
