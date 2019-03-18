@@ -235,7 +235,8 @@ class TestRenderer {
     command_buffers_ =
         vk_device.allocateCommandBuffersUnique(command_buffer_ai);
 
-    for (auto&& command_buffer : command_buffers_) {
+    for (int i = 0; i < command_buffers_.size(); ++i) {
+      auto&& command_buffer = command_buffers_[i];
       vk::CommandBufferBeginInfo command_buffer_bi;
       command_buffer_bi.flags =
           vk::CommandBufferUsageFlagBits::eSimultaneousUse;
@@ -250,6 +251,7 @@ class TestRenderer {
       clear_value.color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
       render_pass_bi.clearValueCount = 1;
       render_pass_bi.pClearValues = &clear_value;
+      render_pass_bi.framebuffer = *frame_buffers_[i];
 
       command_buffer->beginRenderPass(render_pass_bi,
                                       vk::SubpassContents::eInline);
