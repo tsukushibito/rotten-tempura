@@ -259,6 +259,7 @@ class TestRenderer {
                                    *pipeline_);
       command_buffer->draw(3, 1, 0, 0);
       command_buffer->endRenderPass();
+      command_buffer->end();
     }
   }
 

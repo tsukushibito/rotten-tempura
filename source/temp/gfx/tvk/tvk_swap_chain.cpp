@@ -35,7 +35,8 @@ std::vector<TvkSwapChain::Image> CreateSwapChainImages(
     auto view = device.createImageViewUnique(image_view_ci);
     auto acquire_image_semaphore = device.createSemaphoreUnique(semaphore_ci);
     auto render_semaphore = device.createSemaphoreUnique(semaphore_ci);
-    auto fence = device.createFenceUnique(fence_ci);
+    // auto fence = device.createFenceUnique(fence_ci);
+    auto fence = vk::UniqueFence();
     images.emplace_back(Image{image, std::move(view),
                               std::move(acquire_image_semaphore),
                               std::move(render_semaphore), std::move(fence)});
