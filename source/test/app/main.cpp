@@ -267,7 +267,8 @@ class TestRenderer {
     auto vk_device = tvk_device_->device();
     auto swap_chain = tvk_device_->main_swap_chain();
     auto tvk_swap_chain = static_cast<gfx::tvk::TvkSwapChain*>(swap_chain);
-    auto&& wait_semaphore = tvk_swap_chain->current_image().acquire_image_semaphore.get();
+    auto&& wait_semaphore =
+        tvk_swap_chain->current_image().acquire_image_semaphore.get();
     auto image_index = tvk_swap_chain->AcquireNextImage(tvk_device_.get());
 
     auto& image = tvk_swap_chain->images()[image_index];
@@ -298,8 +299,12 @@ class TestRenderer {
   }
 
   void Terminate() {
+#ifdef TEMP_PLATFORM_MAC
+    core::sleep(100);
+#else
     auto vk_device = tvk_device_->device();
     vk_device.waitIdle();
+#endif
   }
 
  private:
