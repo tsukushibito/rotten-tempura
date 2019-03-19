@@ -83,6 +83,8 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
 
+  vk_device.waitIdle();
+
   swap_chain_ci_.imageExtent.width = width;
   swap_chain_ci_.imageExtent.width = height;
   swap_chain_ci_.oldSwapchain = *swap_chain_;
@@ -135,9 +137,7 @@ vk::Format TvkSwapChain::color_format() const {
   return swap_chain_ci_.imageFormat;
 }
 
-vk::SwapchainKHR TvkSwapChain::swap_chain() const {
-  return swap_chain_.get();
-}
+vk::SwapchainKHR TvkSwapChain::swap_chain() const { return swap_chain_.get(); }
 
 const std::vector<TvkSwapChain::Image>& TvkSwapChain::images() const {
   return images_;
