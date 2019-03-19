@@ -307,6 +307,12 @@ class TestRenderer {
 #endif
   }
 
+  void ResizeSwapChain(std::uint32_t width, std::uint32_t height) {
+    auto vk_device = tvk_device_->device();
+    auto swap_chain = tvk_device_->main_swap_chain();
+    swap_chain->Resize(tvk_device_.get(), width, height);
+  }
+
  private:
   std::shared_ptr<gfx::tvk::TvkDevice> tvk_device_;
   vk::UniqueShaderModule vs_module_;
@@ -322,15 +328,17 @@ class TestRenderer {
 int main(int argc, char* argv[]) {
   app::Application application;
 
-  application.on_resize_window() = [](std::uint32_t w, std::uint32_t h) {
-    TEMP_LOG_TRACE("On window resize. (", w, ", ", h, ")");
-  };
   auto window = application.native_window_handle();
   auto window_size = app::GetWindowViewSize(window);
   auto gfx_device = gfx::CreateDevice(gfx::ApiType::kVulkan, window,
                                       window_size.width, window_size.height);
 
   TestRenderer renderer(gfx_device);
+
+  application.on_resize_window() = [&renderer](std::uint32_t w,
+                                               std::uint32_t h) {
+    renderer.ResizeSwapChain(w, h);
+  };
 
   application.on_update() = [&renderer]() { renderer.DrawFrame(); };
   application.on_terminate() = [&renderer]() { renderer.Terminate(); };
