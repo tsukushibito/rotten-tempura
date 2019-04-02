@@ -85,8 +85,17 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
 
   vk_device.waitIdle();
 
-  swap_chain_ci_.imageExtent.width = width;
-  swap_chain_ci_.imageExtent.width = height;
+  auto surf_caps = vk_physical_device.getSurfaceCapabilitiesKHR(*surface_);
+
+  vk::Extent2D swapchain_extent;
+  if (surf_caps.currentExtent.width == -1) {
+    swapchain_extent.width = width;
+    swapchain_extent.height = height;
+  } else {
+    swapchain_extent = surf_caps.currentExtent;
+  }
+
+  swap_chain_ci_.imageExtent = surf_caps.currentExtent;
   swap_chain_ci_.oldSwapchain = *swap_chain_;
 
   auto old_image_count = vk_device.getSwapchainImagesKHR(*swap_chain_).size();
