@@ -8,7 +8,7 @@
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
 vk::UniqueInstance CreateInstance(const std::string& app_name,
                                   const std::string& engine_name,
@@ -37,6 +37,6 @@ vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
     vk::SurfaceKHR surface, const vk::Extent2D& extent,
     vk::SwapchainKHR old_swap_chain);
 
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp

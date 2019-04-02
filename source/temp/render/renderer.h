@@ -8,7 +8,7 @@ namespace temp {
 namespace render {
 class Renderer {
  public:
- private:
+  virtual void Render() = 0;
 };
 
 std::unique_ptr<Renderer> CreateRenderer(

@@ -3,25 +3,25 @@
 #include <memory>
 
 #include "temp/gfx/device.h"
-#include "temp/gfx/tvk/tvk_context.h"
+#include "temp/gfx/vulkan/vulkan_context.h"
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
-class TvkDevice : public Device {
+class VulkanDevice : public Device {
  public:
-  TvkDevice() : TvkDevice(nullptr, 0, 0) {}
-  explicit TvkDevice(const void* window, std::uint32_t window_width,
-                     std::uint32_t window_height);
+  VulkanDevice() : VulkanDevice(nullptr, 0, 0) {}
+  explicit VulkanDevice(const void* window, std::uint32_t window_width,
+                        std::uint32_t window_height);
 
-  ~TvkDevice();
+  ~VulkanDevice();
 
-  TvkDevice(const TvkDevice&) = delete;
-  TvkDevice& operator=(const TvkDevice&) = delete;
+  VulkanDevice(const VulkanDevice&) = delete;
+  VulkanDevice& operator=(const VulkanDevice&) = delete;
 
-  TvkDevice(TvkDevice&& other) = default;
-  TvkDevice& operator=(TvkDevice&& other) = default;
+  VulkanDevice(VulkanDevice&& other) = default;
+  VulkanDevice& operator=(VulkanDevice&& other) = default;
 
   ApiType api_type() const override { return ApiType::kVulkan; }
 
@@ -42,6 +42,6 @@ class TvkDevice : public Device {
   std::unique_ptr<Context> context_;
   std::unique_ptr<SwapChain> main_swap_chain_;
 };
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp

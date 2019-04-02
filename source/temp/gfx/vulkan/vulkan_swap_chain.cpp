@@ -5,19 +5,19 @@
 #ifdef TEMP_GFX_API_VULKAN
 #include <cassert>
 #include "temp/core/logger.h"
-#include "temp/gfx/tvk/tvk_context.h"
-#include "temp/gfx/tvk/tvk_device.h"
-#include "temp/gfx/tvk/tvk_swap_chain.h"
-#include "temp/gfx/tvk/tvk_utility.h"
+#include "temp/gfx/vulkan/vulkan_context.h"
+#include "temp/gfx/vulkan/vulkan_device.h"
+#include "temp/gfx/vulkan/vulkan_swap_chain.h"
+#include "temp/gfx/vulkan/vulkan_utility.h"
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
 namespace {
-std::vector<TvkSwapChain::Image> CreateSwapChainImages(
+std::vector<VulkanSwapChain::Image> CreateSwapChainImages(
     vk::Device device, vk::SwapchainKHR swap_chain, vk::Format image_format) {
-  using Image = TvkSwapChain::Image;
+  using Image = VulkanSwapChain::Image;
 
   vk::ImageViewCreateInfo image_view_ci;
   image_view_ci.format = image_format;
@@ -46,8 +46,8 @@ std::vector<TvkSwapChain::Image> CreateSwapChainImages(
 }
 }  // namespace
 
-TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
-                           std::uint32_t width, std::uint32_t height) {
+VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
+                                 std::uint32_t width, std::uint32_t height) {
   auto vk_instance = device.instance();
   auto vk_physical_device = device.physical_device();
   auto vk_device = device.device();
@@ -69,17 +69,17 @@ TvkSwapChain::TvkSwapChain(const TvkDevice& device, const void* window,
                                   swap_chain_ci_.imageFormat);
 }
 
-void TvkSwapChain::Present(const Device* device) const {
+void VulkanSwapChain::Present(const Device* device) const {
   assert(device->api_type() == ApiType::kVulkan);
-  auto tvk_device = static_cast<const TvkDevice*>(device);
+  auto tvk_device = static_cast<const VulkanDevice*>(device);
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
 }
 
-void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
-                          std::uint32_t height) {
+void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
+                             std::uint32_t height) {
   assert(device->api_type() == ApiType::kVulkan);
-  auto tvk_device = static_cast<const TvkDevice*>(device);
+  auto tvk_device = static_cast<const VulkanDevice*>(device);
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
 
@@ -118,33 +118,47 @@ void TvkSwapChain::Resize(const Device* device, std::uint32_t width,
   }
 }
 
-std::uint32_t TvkSwapChain::width() const {
+std::uint32_t VulkanSwapChain::width() const {
   return swap_chain_ci_.imageExtent.width;
 }
 
-std::uint32_t TvkSwapChain::height() const {
+std::uint32_t VulkanSwapChain::height() const {
   return swap_chain_ci_.imageExtent.height;
 }
 
-std::uint32_t TvkSwapChain::current_image_index() const {
+std::uint32_t VulkanSwapChain::current_image_index() const {
   return current_image_;
 }
-const TvkSwapChain::Image& TvkSwapChain::current_image() const {
+const VulkanSwapChain::Image& VulkanSwapChain::current_image() const {
   return images_[current_image_];
 }
 
-vk::Format TvkSwapChain::color_format() const {
+vk::Format VulkanSwapChain::color_format() const {
   return swap_chain_ci_.imageFormat;
 }
 
-vk::SwapchainKHR TvkSwapChain::swap_chain() const { return swap_chain_.get(); }
-
-const std::vector<TvkSwapChain::Image>& TvkSwapChain::images() const {
-  return images_;
+vk::SwapchainKHR VulkanSwapChain::swap_chain() const {
+  return swap_chain_.get();
 }
 
-std::uint32_t TvkSwapChain::AcquireNextImage(const Device* device) {
-  auto tvk_device = static_cast<const TvkDevice*>(device);
+const std::uint32_t VulkanSwapChain::image_count() const {
+  return images_.size();
+}
+
+const VulkanSwapChain::Image& VulkanSwapChain::image(int index) const {
+  return images_[index];
+}
+
+const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
+  return *frame_buffers_[index];
+}
+
+const vk::CommandBuffer VulkanSwapChain::command_buffer(int index) const {
+  return *command_buffers_[index];
+}
+
+std::uint32_t VulkanSwapChain::AcquireNextImage(const Device* device) {
+  auto tvk_device = static_cast<const VulkanDevice*>(device);
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
 
@@ -161,7 +175,7 @@ std::uint32_t TvkSwapChain::AcquireNextImage(const Device* device) {
   return current_image_;
 }
 
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp
 

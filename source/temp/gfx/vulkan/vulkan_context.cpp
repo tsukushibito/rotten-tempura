@@ -10,12 +10,12 @@
 
 #include "temp/core/logger.h"
 
-#include "temp/gfx/tvk/tvk_context.h"
-#include "temp/gfx/tvk/tvk_utility.h"
+#include "temp/gfx/vulkan/vulkan_context.h"
+#include "temp/gfx/vulkan/vulkan_utility.h"
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
 Context::Context(const void* window) {
   instance_ = CreateInstance("tempura", "tempura", true);
@@ -102,7 +102,7 @@ const std::map<vk::QueueFlagBits, vk::Queue>& Context::queue_table() const {
   return queue_table_;
 }
 
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp
 

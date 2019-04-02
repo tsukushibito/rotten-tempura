@@ -3,7 +3,7 @@
 #include "temp/gfx/device.h"
 
 #ifdef TEMP_GFX_API_VULKAN
-#include "temp/gfx/tvk/tvk_device.h"
+#include "temp/gfx/vulkan/vulkan_device.h"
 #endif
 
 namespace temp {
@@ -16,7 +16,7 @@ std::shared_ptr<Device> CreateDevice(ApiType api, const void* window,
   switch (api) {
 #ifdef TEMP_GFX_API_VULKAN
     case ApiType::kVulkan:
-      device = std::make_shared<tvk::TvkDevice>(window, width, height);
+      device = std::make_shared<vulkan::VulkanDevice>(window, width, height);
       break;
 #endif
     default:

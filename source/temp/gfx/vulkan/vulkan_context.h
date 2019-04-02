@@ -10,7 +10,7 @@
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
 class Context {
  public:
@@ -48,6 +48,6 @@ class Context {
   vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
       messenger_;
 };
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp

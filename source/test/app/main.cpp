@@ -9,9 +9,9 @@
 #include <temp/core/core.h>
 #include <temp/gfx/gfx.h>
 
-#include <temp/gfx/tvk/tvk_context.h>
-#include <temp/gfx/tvk/tvk_device.h>
-#include <temp/gfx/tvk/tvk_swap_chain.h>
+#include <temp/gfx/vulkan/vulkan_context.h>
+#include <temp/gfx/vulkan/vulkan_device.h>
+#include <temp/gfx/vulkan/vulkan_swap_chain.h>
 
 #include <boost/filesystem.hpp>
 
@@ -39,11 +39,12 @@ std::vector<char> ReadFile(const std::string& file_path) {
 class TestRenderer {
  public:
   TestRenderer(const std::shared_ptr<gfx::Device>& device) {
-    tvk_device_ = std::static_pointer_cast<gfx::tvk::TvkDevice>(device);
+    tvk_device_ = std::static_pointer_cast<gfx::vulkan::VulkanDevice>(device);
     auto vk_device = tvk_device_->device();
 
     auto swap_chain = device->main_swap_chain();
-    auto tvk_swap_chain = static_cast<gfx::tvk::TvkSwapChain*>(swap_chain);
+    auto tvk_swap_chain =
+        static_cast<gfx::vulkan::VulkanSwapChain*>(swap_chain);
 
     auto vs_code = ReadFile("shader/vert.spv");
 
@@ -205,10 +206,10 @@ class TestRenderer {
     pipeline_ = vk_device.createGraphicsPipelineUnique(vk::PipelineCache(),
                                                        pipeline_ci);
 
-    auto& images = tvk_swap_chain->images();
-
-    for (int i = 0; i < images.size(); ++i) {
-      vk::ImageView attachments[] = {*images[i].view};
+    auto image_count = tvk_swap_chain->image_count();
+    for (int i = 0; i < image_count; ++i) {
+      auto&& image = tvk_swap_chain->image(i);
+      vk::ImageView attachments[] = {*image.view};
 
       vk::FramebufferCreateInfo frame_buffer_ci;
       frame_buffer_ci.renderPass = *render_pass_;
@@ -231,7 +232,7 @@ class TestRenderer {
     vk::CommandBufferAllocateInfo command_buffer_ai;
     command_buffer_ai.commandPool = *command_pool_;
     command_buffer_ai.level = vk::CommandBufferLevel::ePrimary;
-    command_buffer_ai.commandBufferCount = (std::uint32_t)images.size();
+    command_buffer_ai.commandBufferCount = image_count;
     command_buffers_ =
         vk_device.allocateCommandBuffersUnique(command_buffer_ai);
 
@@ -266,12 +267,13 @@ class TestRenderer {
   void DrawFrame() {
     auto vk_device = tvk_device_->device();
     auto swap_chain = tvk_device_->main_swap_chain();
-    auto tvk_swap_chain = static_cast<gfx::tvk::TvkSwapChain*>(swap_chain);
+    auto tvk_swap_chain =
+        static_cast<gfx::vulkan::VulkanSwapChain*>(swap_chain);
     auto&& wait_semaphore =
         tvk_swap_chain->current_image().acquire_image_semaphore.get();
     auto image_index = tvk_swap_chain->AcquireNextImage(tvk_device_.get());
 
-    auto& image = tvk_swap_chain->images()[image_index];
+    auto& image = tvk_swap_chain->image(image_index);
     vk::SubmitInfo submit_info;
     vk::PipelineStageFlags wait_stages[] = {
         vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -314,7 +316,7 @@ class TestRenderer {
   }
 
  private:
-  std::shared_ptr<gfx::tvk::TvkDevice> tvk_device_;
+  std::shared_ptr<gfx::vulkan::VulkanDevice> tvk_device_;
   vk::UniqueShaderModule vs_module_;
   vk::UniqueShaderModule fs_module_;
   vk::UniquePipelineLayout pipeline_layout_;

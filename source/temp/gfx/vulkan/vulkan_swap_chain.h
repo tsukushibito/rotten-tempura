@@ -2,13 +2,13 @@
 #include <vulkan/vulkan.hpp>
 
 #include "temp/gfx/swap_chain.h"
-#include "temp/gfx/tvk/tvk_device.h"
+#include "temp/gfx/vulkan/vulkan_device.h"
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
-class TvkSwapChain : public SwapChain {
+class VulkanSwapChain : public SwapChain {
  public:
   struct Image {
     vk::Image image;
@@ -18,15 +18,15 @@ class TvkSwapChain : public SwapChain {
     vk::UniqueFence fence;
   };
 
-  explicit TvkSwapChain(const TvkDevice& device, const void* window,
-                        std::uint32_t width, std::uint32_t height);
-  ~TvkSwapChain() = default;
+  explicit VulkanSwapChain(const VulkanDevice& device, const void* window,
+                           std::uint32_t width, std::uint32_t height);
+  ~VulkanSwapChain() = default;
 
-  TvkSwapChain(const TvkSwapChain&) = delete;
-  TvkSwapChain& operator=(const TvkSwapChain&) = delete;
+  VulkanSwapChain(const VulkanSwapChain&) = delete;
+  VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
 
-  TvkSwapChain(TvkSwapChain&&) = default;
-  TvkSwapChain& operator=(TvkSwapChain&&) = default;
+  VulkanSwapChain(VulkanSwapChain&&) = default;
+  VulkanSwapChain& operator=(VulkanSwapChain&&) = default;
 
  public:
   ApiType api_type() const override { return ApiType::kVulkan; }
@@ -47,7 +47,13 @@ class TvkSwapChain : public SwapChain {
 
   vk::SwapchainKHR swap_chain() const;
 
-  const std::vector<Image>& images() const;
+  const std::uint32_t image_count() const;
+
+  const Image& image(int index) const;
+
+  const vk::Framebuffer frame_buffer(int index) const;
+
+  const vk::CommandBuffer command_buffer(int index) const;
 
   std::uint32_t AcquireNextImage(const Device* device);
 
@@ -59,8 +65,10 @@ class TvkSwapChain : public SwapChain {
   vk::UniqueSwapchainKHR swap_chain_;
   std::uint32_t current_image_ = 0;
   std::vector<Image> images_;
+  std::vector<vk::UniqueFramebuffer> frame_buffers_;
+  std::vector<vk::UniqueCommandBuffer> command_buffers_;
 };
 
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp

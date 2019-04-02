@@ -10,11 +10,11 @@
 #include "temp/core/assertion.h"
 #include "temp/core/logger.h"
 
-#include "temp/gfx/tvk/tvk_utility.h"
+#include "temp/gfx/vulkan/vulkan_utility.h"
 
 namespace temp {
 namespace gfx {
-namespace tvk {
+namespace vulkan {
 
 namespace {
 
@@ -413,7 +413,7 @@ vk::SwapchainCreateInfoKHR SetupSwapchainCreateInfo(
 
   return create_info;
 }
-}  // namespace tvk
+}  // namespace vulkan
 }  // namespace gfx
 }  // namespace temp
 
