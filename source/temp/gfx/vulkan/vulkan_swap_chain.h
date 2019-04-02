@@ -51,11 +51,21 @@ class VulkanSwapChain : public SwapChain {
 
   const Image& image(int index) const;
 
+  const vk::RenderPass render_pass() const;
+
   const vk::Framebuffer frame_buffer(int index) const;
 
   const vk::CommandBuffer command_buffer(int index) const;
 
   std::uint32_t AcquireNextImage(const Device* device);
+
+  void CreateRenderPass(const Device* device);
+
+  void CreatePipeline(const Device* device);
+
+  void CreateFrameBuffers(const Device* device);
+
+  void CreateCommandBuffers(const Device* device);
 
  private:
   vk::UniqueSurfaceKHR surface_;
@@ -65,7 +75,15 @@ class VulkanSwapChain : public SwapChain {
   vk::UniqueSwapchainKHR swap_chain_;
   std::uint32_t current_image_ = 0;
   std::vector<Image> images_;
+  vk::UniqueRenderPass render_pass_;
+
+  vk::UniqueShaderModule vs_module_;
+  vk::UniqueShaderModule fs_module_;
+  vk::UniquePipelineLayout pipeline_layout_;
+  vk::UniquePipeline pipeline_;
+
   std::vector<vk::UniqueFramebuffer> frame_buffers_;
+  vk::UniqueCommandPool command_pool_;
   std::vector<vk::UniqueCommandBuffer> command_buffers_;
 };
 
