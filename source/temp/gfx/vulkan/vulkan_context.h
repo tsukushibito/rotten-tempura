@@ -6,7 +6,10 @@
 #include <string>
 #include <tuple>
 
+#pragma warning(push)
+#pragma warning(disable:26495)
 #include <vulkan/vulkan.hpp>
+#pragma warning(pop)
 
 namespace temp {
 namespace gfx {

@@ -156,7 +156,7 @@ vk::SwapchainKHR VulkanSwapChain::swap_chain() const {
 }
 
 const std::uint32_t VulkanSwapChain::image_count() const {
-  return images_.size();
+	return static_cast<std::uint32_t>(images_.size());
 }
 
 const VulkanSwapChain::Image& VulkanSwapChain::image(int index) const {
@@ -267,7 +267,7 @@ void VulkanSwapChain::CreateCommandBuffers(const Device* device){
   vk::CommandBufferAllocateInfo command_buffer_ai;
   command_buffer_ai.commandPool = *command_pool_;
   command_buffer_ai.level = vk::CommandBufferLevel::ePrimary;
-  command_buffer_ai.commandBufferCount = images_.size();
+  command_buffer_ai.commandBufferCount = static_cast<std::uint32_t>(images_.size());
   command_buffers_ =
       vk_device.allocateCommandBuffersUnique(command_buffer_ai);
 
