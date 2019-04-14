@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <map>
+
+#include <vulkan/vulkan.hpp>
 
 #include "temp/gfx/device.h"
-#include "temp/gfx/vulkan/vulkan_context.h"
 
 namespace temp {
 namespace gfx {
@@ -27,19 +30,42 @@ class VulkanDevice : public Device {
 
   SwapChain* main_swap_chain() const override { return main_swap_chain_.get(); }
 
+  std::vector<vk::Format> GetSupportedDepthFormats() const;
+
   std::unique_ptr<SwapChain> CreateSwapChain(
       const void* window, std::uint32_t width,
       std::uint32_t height) const override;
 
+  const vk::DispatchLoaderDynamic& dispatcher() const;
   vk::Instance instance() const;
   vk::PhysicalDevice physical_device() const;
   vk::Device device() const;
+  const std::map<vk::QueueFlagBits, int>& queue_index_table() const;
   int graphics_queue_index() const;
-
-  const Context& context() const { return *context_; }
+  const std::map<vk::QueueFlagBits, vk::Queue>& queue_table() const;
 
  private:
-  std::unique_ptr<Context> context_;
+  vk::DispatchLoaderDynamic dispatcher_;
+
+  vk::UniqueInstance instance_;
+
+  std::vector<vk::PhysicalDevice> physical_devices_;
+  vk::PhysicalDevice physical_device_;
+
+  vk::PhysicalDeviceProperties device_properties_;
+  vk::PhysicalDeviceFeatures device_features_;
+  vk::PhysicalDeviceMemoryProperties device_memory_properties_;
+
+  std::vector<vk::QueueFamilyProperties> queue_family_properties_;
+  std::map<vk::QueueFlagBits, int> queue_index_table_;
+
+  vk::UniqueDevice device_;
+
+  std::map<vk::QueueFlagBits, vk::Queue> queue_table_;
+
+  vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
+      messenger_;
+
   std::unique_ptr<SwapChain> main_swap_chain_;
 };
 }  // namespace vulkan

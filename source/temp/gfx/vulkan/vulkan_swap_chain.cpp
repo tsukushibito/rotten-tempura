@@ -5,7 +5,6 @@
 #ifdef TEMP_GFX_API_VULKAN
 #include <cassert>
 #include "temp/core/logger.h"
-#include "temp/gfx/vulkan/vulkan_context.h"
 #include "temp/gfx/vulkan/vulkan_device.h"
 #include "temp/gfx/vulkan/vulkan_swap_chain.h"
 #include "temp/gfx/vulkan/vulkan_utility.h"
@@ -63,13 +62,14 @@ VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
                                *surface_, extent, vk::SwapchainKHR());
 
   // Create swapchain.
+  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr, device.dispatcher());
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
 
   images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                   swap_chain_ci_.imageFormat);
 
   vk::CommandPoolCreateInfo command_pool_ci;
-  auto pair = device.context().queue_index_table().find(
+  auto pair = device.queue_index_table().find(
       vk::QueueFlagBits::eGraphics);
   command_pool_ci.queueFamilyIndex = pair->second;
   command_pool_ = vk_device.createCommandPoolUnique(command_pool_ci);
@@ -106,6 +106,7 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
 
   auto old_image_count = vk_device.getSwapchainImagesKHR(*swap_chain_).size();
 
+  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr, tvk_device->dispatcher());
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
   if (swap_chain_ci_.oldSwapchain != vk::SwapchainKHR()) {
     for (auto&& image : images_) {

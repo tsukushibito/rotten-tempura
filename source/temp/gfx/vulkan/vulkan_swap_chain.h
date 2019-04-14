@@ -28,7 +28,6 @@ class VulkanSwapChain : public SwapChain {
   VulkanSwapChain(VulkanSwapChain&&) = default;
   VulkanSwapChain& operator=(VulkanSwapChain&&) = default;
 
- public:
   ApiType api_type() const override { return ApiType::kVulkan; }
 
   void Present(const Device* device) const override;
@@ -68,6 +67,8 @@ class VulkanSwapChain : public SwapChain {
   void CreateCommandBuffers(const Device* device);
 
  private:
+  // using UniqueSwapchainKHR = vk::UniqueHandle<vk::SwapchainKHR, vk::DispatchLoaderDynamic>;
+
   vk::UniqueSurfaceKHR surface_;
   vk::Format color_format_;
   vk::ColorSpaceKHR color_space_;

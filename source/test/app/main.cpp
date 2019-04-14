@@ -9,7 +9,6 @@
 #include <temp/core/core.h>
 #include <temp/gfx/gfx.h>
 
-#include <temp/gfx/vulkan/vulkan_context.h>
 #include <temp/gfx/vulkan/vulkan_device.h>
 #include <temp/gfx/vulkan/vulkan_swap_chain.h>
 
@@ -224,7 +223,7 @@ class TestRenderer {
     }
 
     vk::CommandPoolCreateInfo command_pool_ci;
-    auto pair = tvk_device_->context().queue_index_table().find(
+    auto pair = tvk_device_->queue_index_table().find(
         vk::QueueFlagBits::eGraphics);
     command_pool_ci.queueFamilyIndex = pair->second;
     command_pool_ = vk_device.createCommandPoolUnique(command_pool_ci);
@@ -284,7 +283,7 @@ class TestRenderer {
     submit_info.pCommandBuffers = &(command_buffers_[image_index].get());
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = &image.render_semaphore.get();
-    auto& queue_table = tvk_device_->context().queue_table();
+    auto& queue_table = tvk_device_->queue_table();
     auto& graphics_queue =
         queue_table.find(vk::QueueFlagBits::eGraphics)->second;
     graphics_queue.submit(1, &submit_info, vk::Fence());

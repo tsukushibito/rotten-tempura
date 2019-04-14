@@ -55,6 +55,8 @@ VkBool32 MessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                          VkDebugUtilsMessageTypeFlagsEXT type,
                          const VkDebugUtilsMessengerCallbackDataEXT* data,
                          void* pUserData) {
+  (void*)pUserData;
+
   std::stringstream ss;
 
   std::string prefix;
@@ -137,7 +139,7 @@ vk::UniqueInstance CreateInstance(const std::string& app_name,
   std::vector<const char*> layers;
   if (enabled_validation) {
     layers = FilterLayers(kValidationLayerNames);
-    instanceCreateInfo.enabledLayerCount = layers.size();
+    instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
     instanceCreateInfo.ppEnabledLayerNames = layers.data();
   }
 
@@ -172,7 +174,7 @@ vk::PhysicalDevice PickPhysicalDevices(
     score += properties.limits.maxImageDimension2D;
 
     auto memory_properties = device.getMemoryProperties();
-    score += memory_properties.memoryHeaps[0].size / 1000000;
+    score += static_cast<int>(memory_properties.memoryHeaps[0].size) / 1000000;
     candidates.insert(std::make_pair(score, device));
   }
 
@@ -242,7 +244,7 @@ CreateLogicalDevice(
   graphics_queue_create_info.queueCount =
       queue_family_properties[graphics_queue_index].queueCount;
   std::vector<float> graphics_queue_priorities;
-  for (int i = 0; i < graphics_queue_create_info.queueCount; ++i) {
+  for (uint32_t i = 0; i < graphics_queue_create_info.queueCount; ++i) {
     graphics_queue_priorities.emplace_back(1.0f);
   }
   graphics_queue_create_info.pQueuePriorities =
@@ -259,7 +261,7 @@ CreateLogicalDevice(
     compute_queue_create_info.queueFamilyIndex = compute_queue_index;
     compute_queue_create_info.queueCount =
         queue_family_properties[compute_queue_index].queueCount;
-    for (int i = 0; i < compute_queue_create_info.queueCount; ++i) {
+    for (uint32_t i = 0; i < compute_queue_create_info.queueCount; ++i) {
       compute_queue_priorities.emplace_back(1.0f);
     }
     compute_queue_create_info.pQueuePriorities =
@@ -278,7 +280,7 @@ CreateLogicalDevice(
     transfer_queue_create_info.queueFamilyIndex = transfer_queue_index;
     transfer_queue_create_info.queueCount =
         queue_family_properties[transfer_queue_index].queueCount;
-    for (int i = 0; i < transfer_queue_create_info.queueCount; ++i) {
+    for (uint32_t i = 0; i < transfer_queue_create_info.queueCount; ++i) {
       transfer_queue_priorities.emplace_back(1.0f);
     }
     transfer_queue_create_info.pQueuePriorities =
@@ -288,7 +290,7 @@ CreateLogicalDevice(
 
   vk::DeviceCreateInfo device_create_info;
 
-  device_create_info.queueCreateInfoCount = queue_create_infos.size();
+  device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
   device_create_info.pQueueCreateInfos = queue_create_infos.data();
   auto features = physical_device.getFeatures();
   device_create_info.pEnabledFeatures = &features;
@@ -316,7 +318,7 @@ CreateLogicalDevice(
 
   device_extensions.erase(end, device_extensions.end());
 
-  device_create_info.enabledExtensionCount = device_extensions.size();
+  device_create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
   device_create_info.ppEnabledExtensionNames = device_extensions.data();
 
   auto device = physical_device.createDeviceUnique(device_create_info);
