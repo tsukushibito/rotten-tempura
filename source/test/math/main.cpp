@@ -1,6 +1,7 @@
 ﻿#define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include "temp/core/define.h"
 #include "temp/core/logger.h"
 #include "temp/math/temp_math.h"
 
@@ -266,9 +267,9 @@ BOOST_AUTO_TEST_CASE(transform_) {
   auto pos = Vector3(1, 1, 1);
   pos = transform(pos, mat);
   pos += Vector3(1, 1, 1);
-  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 1, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 1, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(pos.z(), 1, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 1.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 1.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.z(), 1.0f, 0.00001f);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -300,24 +301,24 @@ BOOST_AUTO_TEST_CASE(inv) {
 BOOST_AUTO_TEST_CASE(euler) {
   auto quat = Quaternion::axisAngle(Vector3(1, 0, 0), 90);
   auto euler = eulerAngles(quat);
-  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 90, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 0, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 0, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 90.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 0.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 0.0f, 0.00001f);
   quat.x() = 0.5319757f;
   quat.y() = 0.02226007f;
   quat.z() = 0.2005621f;
   quat.w() = 0.8223631f;
   euler = eulerAngles(quat);
-  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 60, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 30, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 45, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.x(), 60.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.y(), 30.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(euler.z(), 45.0f, 0.00001f);
 }
 BOOST_AUTO_TEST_CASE(rot) {
   auto quat = Quaternion::axisAngle(Vector3(0, 1, 0), 90);
   auto pos = Vector3(1, 0, 0);
   pos = rotate(pos, quat);
-  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 0, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 0, 0.00001f);
-  BOOST_CHECK_CLOSE_FRACTION(pos.z(), -1, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.x(), 0.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.y(), 0.0f, 0.00001f);
+  BOOST_CHECK_CLOSE_FRACTION(pos.z(), -1.0f, 0.00001f);
 }
 BOOST_AUTO_TEST_SUITE_END()

@@ -144,7 +144,7 @@ T determinant(const Matrix44Base<T>& mat) {
   static const auto kRows = Matrix44Base<T>::kRows;
 
   // 余因子から行列式を求める
-  auto d = 0;
+  T d = 0;
   for (int i = 0; i < kRows; ++i) {
     d += mat[i][0] * cofactor(mat, i, 0);
   }

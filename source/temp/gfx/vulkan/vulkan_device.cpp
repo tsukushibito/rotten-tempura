@@ -17,7 +17,7 @@ VulkanDevice::VulkanDevice(const void* window, std::uint32_t window_width,
                            std::uint32_t window_height) {
   instance_ = CreateInstance("tempura", "tempura", true);
 
-  dispatcher_.init(*instance_);
+  dispatcher_.init(*instance_, reinterpret_cast<PFN_vkGetInstanceProcAddr>(vkGetInstanceProcAddr));
 
   // TODO: Set from config file.
   auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
@@ -48,7 +48,10 @@ VulkanDevice::VulkanDevice(const void* window, std::uint32_t window_width,
   }
   queue_index_table_ = std::get<1>(device_and_queue_indices);
 
-  dispatcher_.init(*instance_, *device_);
+  dispatcher_.init(
+      *instance_,
+      reinterpret_cast<PFN_vkGetInstanceProcAddr>(vkGetInstanceProcAddr),
+      *device_, reinterpret_cast<PFN_vkGetDeviceProcAddr>(vkGetDeviceProcAddr));
 
   queue_table_[vk::QueueFlagBits::eGraphics] =
       device_->getQueue(queue_index_table_[vk::QueueFlagBits::eGraphics], 0);
