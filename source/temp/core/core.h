@@ -1,5 +1,6 @@
 #pragma once
 #include "temp/core/assertion.h"
+#include "temp/core/color.h"
 #include "temp/core/define.h"
 #include "temp/core/logger.h"
 #include "temp/core/read_file.h"

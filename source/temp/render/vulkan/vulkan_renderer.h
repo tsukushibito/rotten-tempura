@@ -3,6 +3,9 @@
 #include "temp/core/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
+#include <mutex>
+#include <unordered_map>
+
 #include "temp/render/renderer.h"
 
 #include "temp/gfx/vulkan/vulkan_device.h"

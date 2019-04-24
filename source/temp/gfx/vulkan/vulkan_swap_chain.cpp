@@ -43,6 +43,72 @@ std::vector<VulkanSwapChain::Image> CreateSwapChainImages(
   }
   return images;
 }
+
+
+vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device, vk::Format color_format) {
+  vk::AttachmentDescription color_attachment;
+  color_attachment.format = color_format;
+  color_attachment.samples = vk::SampleCountFlagBits::e1;
+  color_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+  color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+  color_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+  color_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+  color_attachment.initialLayout = vk::ImageLayout::eUndefined;
+  color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+  
+  vk::AttachmentReference color_attachment_ref;
+  color_attachment_ref.attachment = 0;
+  color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+  
+  vk::SubpassDescription subpass;
+  subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+  subpass.colorAttachmentCount = 1;
+  subpass.pColorAttachments = &color_attachment_ref;
+  
+  vk::RenderPassCreateInfo render_pass_ci;
+  vk::SubpassDependency subpass_dependency;
+  subpass_dependency.dstSubpass = 0;
+  subpass_dependency.srcStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  subpass_dependency.srcAccessMask = vk::AccessFlagBits();
+  subpass_dependency.dstStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  subpass_dependency.dstAccessMask =
+      vk::AccessFlagBits::eColorAttachmentRead |
+      vk::AccessFlagBits::eColorAttachmentWrite;
+  render_pass_ci.attachmentCount = 1;
+  render_pass_ci.pAttachments = &color_attachment;
+  render_pass_ci.subpassCount = 1;
+  render_pass_ci.pSubpasses = &subpass;
+  render_pass_ci.dependencyCount = 1;
+  render_pass_ci.pDependencies = &subpass_dependency;
+  return vk_device.createRenderPassUnique(render_pass_ci);
+}
+
+std::vector<vk::UniqueFramebuffer> CreateFrameBuffers(
+    const vk::Device vk_device, const std::vector<VulkanSwapChain::Image>& images,
+    vk::RenderPass render_pass, std::uint32_t width, std::uint32_t height) {
+  std::vector<vk::UniqueFramebuffer> frame_buffers;
+
+  auto image_count = images.size();
+  for (auto&& image: images) {
+    vk::ImageView attachments[] = {*image.view};
+
+    vk::FramebufferCreateInfo frame_buffer_ci;
+    frame_buffer_ci.renderPass = render_pass;
+    frame_buffer_ci.attachmentCount = 1;
+    frame_buffer_ci.pAttachments = attachments;
+    frame_buffer_ci.width = width;
+    frame_buffer_ci.height = height;
+    frame_buffer_ci.layers = 1;
+
+    frame_buffers.emplace_back(
+        vk_device.createFramebufferUnique(frame_buffer_ci));
+  }
+
+  return std::move(frame_buffers);
+}
+
 }  // namespace
 
 VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
@@ -178,46 +244,6 @@ const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
   return *frame_buffers_[index];
 }
 
-void VulkanSwapChain::CreateRenderPass(const vk::Device vk_device) {
-  vk::AttachmentDescription color_attachment;
-  color_attachment.format = color_format();
-  color_attachment.samples = vk::SampleCountFlagBits::e1;
-  color_attachment.loadOp = vk::AttachmentLoadOp::eClear;
-  color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
-  color_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-  color_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-  color_attachment.initialLayout = vk::ImageLayout::eUndefined;
-  color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
-  
-  vk::AttachmentReference color_attachment_ref;
-  color_attachment_ref.attachment = 0;
-  color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
-  
-  vk::SubpassDescription subpass;
-  subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-  subpass.colorAttachmentCount = 1;
-  subpass.pColorAttachments = &color_attachment_ref;
-  
-  vk::RenderPassCreateInfo render_pass_ci;
-  vk::SubpassDependency subpass_dependency;
-  subpass_dependency.dstSubpass = 0;
-  subpass_dependency.srcStageMask =
-      vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  subpass_dependency.srcAccessMask = vk::AccessFlagBits();
-  subpass_dependency.dstStageMask =
-      vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  subpass_dependency.dstAccessMask =
-      vk::AccessFlagBits::eColorAttachmentRead |
-      vk::AccessFlagBits::eColorAttachmentWrite;
-  render_pass_ci.attachmentCount = 1;
-  render_pass_ci.pAttachments = &color_attachment;
-  render_pass_ci.subpassCount = 1;
-  render_pass_ci.pSubpasses = &subpass;
-  render_pass_ci.dependencyCount = 1;
-  render_pass_ci.pDependencies = &subpass_dependency;
-  render_pass_ = vk_device.createRenderPassUnique(render_pass_ci);
-}
-
 std::uint32_t VulkanSwapChain::AcquireNextImage(const vk::Device vk_device) {
 
   auto result_value = vk_device.acquireNextImageKHR(
@@ -231,27 +257,6 @@ std::uint32_t VulkanSwapChain::AcquireNextImage(const vk::Device vk_device) {
   }
   current_image_ = result_value.value;
   return current_image_;
-}
-
-void VulkanSwapChain::CreateFrameBuffers(const vk::Device vk_device) {
-  frame_buffers_.clear();
-
-  auto image_count = images_.size();
-  for (int i = 0; i < image_count; ++i) {
-    auto&& image = this->image(i);
-    vk::ImageView attachments[] = {*image.view};
-
-    vk::FramebufferCreateInfo frame_buffer_ci;
-    frame_buffer_ci.renderPass = *render_pass_;
-    frame_buffer_ci.attachmentCount = 1;
-    frame_buffer_ci.pAttachments = attachments;
-    frame_buffer_ci.width = width();
-    frame_buffer_ci.height = height();
-    frame_buffer_ci.layers = 1;
-
-    frame_buffers_.emplace_back(
-        vk_device.createFramebufferUnique(frame_buffer_ci));
-  }
 }
 
 }  // namespace vulkan

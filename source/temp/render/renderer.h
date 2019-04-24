@@ -20,7 +20,7 @@ class Renderer {
 
   std::unique_ptr<Camera> CreateCamera();
 
- private:
+ protected:
   using CameraTable = std::unordered_set<Camera*>;
 
   std::shared_ptr<CameraTable> camera_table_;

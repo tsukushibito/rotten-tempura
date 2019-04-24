@@ -3,6 +3,8 @@
 #include <memory>
 #include <functional>
 
+#include "temp/core/color.h"
+
 #include "temp/math/matrix44.h"
 #include "temp/math/quaternion.h"
 #include "temp/math/vector3.h"
@@ -21,6 +23,12 @@ struct Camera {
     kPerspective,
   };
 
+  enum class ClearMode {
+    kSolidColor,
+    kDepthOnly,
+	kNone,
+  };
+
  private:
   explicit Camera(const std::function<void(Camera*)>& on_delete);
 
@@ -29,6 +37,8 @@ struct Camera {
 
   math::Vector3 position;
   math::Quaternion rotation;
+  ClearMode clear_mode;
+  core::Color clear_color;
   ProjectionType projection_type;
   float near_clip;
   float far_clip;

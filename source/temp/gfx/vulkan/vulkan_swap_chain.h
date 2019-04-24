@@ -55,11 +55,8 @@ class VulkanSwapChain : public SwapChain {
   const vk::Framebuffer frame_buffer(int index) const;
 
   std::uint32_t AcquireNextImage(const vk::Device vk_device);
+
 private:
-
-  void CreateRenderPass(const vk::Device device);
-
-  void CreateFrameBuffers(const vk::Device device);
 
   vk::UniqueSurfaceKHR surface_;
   vk::Format color_format_;
