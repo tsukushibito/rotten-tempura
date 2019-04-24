@@ -62,24 +62,30 @@ VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
                                *surface_, extent, vk::SwapchainKHR());
 
   // Create swapchain.
-  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr, device.dispatcher());
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
 
   images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                   swap_chain_ci_.imageFormat);
-
-  vk::CommandPoolCreateInfo command_pool_ci;
-  auto pair = device.queue_index_table().find(
-      vk::QueueFlagBits::eGraphics);
-  command_pool_ci.queueFamilyIndex = pair->second;
-  command_pool_ = vk_device.createCommandPoolUnique(command_pool_ci);
 }
 
-void VulkanSwapChain::Present(const Device* device) const {
+void VulkanSwapChain::Present(const Device* device) {
   assert(device->api_type() == ApiType::kVulkan);
-  auto tvk_device = static_cast<const VulkanDevice*>(device);
-  auto vk_physical_device = tvk_device->physical_device();
-  auto vk_device = tvk_device->device();
+  auto temp_device = static_cast<const VulkanDevice*>(device);
+  auto vk_device = temp_device->device();
+
+  auto image_index = AcquireNextImage(vk_device);
+
+  vk::PresentInfoKHR present_info;
+  present_info.waitSemaphoreCount = 1;
+  present_info.pWaitSemaphores = &current_image().render_semaphore.get();
+  present_info.swapchainCount = 1;
+  present_info.pSwapchains = &(*swap_chain_);
+  present_info.pImageIndices = &image_index;
+
+  auto&& iter = temp_device->queue_table().find(vk::QueueFlagBits::eGraphics);
+  assert(iter != temp_device->queue_table().end());
+  auto&& graphics_queue = iter->second;
+  graphics_queue.presentKHR(present_info);
 }
 
 void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
@@ -172,14 +178,7 @@ const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
   return *frame_buffers_[index];
 }
 
-const vk::CommandBuffer VulkanSwapChain::command_buffer(int index) const {
-  return *command_buffers_[index];
-}
-
-void VulkanSwapChain::CreateRenderPass(const Device* device) {
-  auto temp_device = static_cast<const VulkanDevice*>(device);
-  auto vk_device = temp_device->device();
-
+void VulkanSwapChain::CreateRenderPass(const vk::Device vk_device) {
   vk::AttachmentDescription color_attachment;
   color_attachment.format = color_format();
   color_attachment.samples = vk::SampleCountFlagBits::e1;
@@ -219,10 +218,7 @@ void VulkanSwapChain::CreateRenderPass(const Device* device) {
   render_pass_ = vk_device.createRenderPassUnique(render_pass_ci);
 }
 
-std::uint32_t VulkanSwapChain::AcquireNextImage(const Device* device) {
-  auto temp_device = static_cast<const VulkanDevice*>(device);
-  auto vk_physical_device = temp_device->physical_device();
-  auto vk_device = temp_device->device();
+std::uint32_t VulkanSwapChain::AcquireNextImage(const vk::Device vk_device) {
 
   auto result_value = vk_device.acquireNextImageKHR(
       *swap_chain_, std::numeric_limits<uint64_t>::max(),
@@ -237,10 +233,7 @@ std::uint32_t VulkanSwapChain::AcquireNextImage(const Device* device) {
   return current_image_;
 }
 
-void VulkanSwapChain::CreateFrameBuffers(const Device* device) {
-  auto temp_device = static_cast<const VulkanDevice*>(device);
-  auto vk_device = temp_device->device();
-
+void VulkanSwapChain::CreateFrameBuffers(const vk::Device vk_device) {
   frame_buffers_.clear();
 
   auto image_count = images_.size();
@@ -258,45 +251,6 @@ void VulkanSwapChain::CreateFrameBuffers(const Device* device) {
 
     frame_buffers_.emplace_back(
         vk_device.createFramebufferUnique(frame_buffer_ci));
-  }
-}
-
-void VulkanSwapChain::CreateCommandBuffers(const Device* device){
-  auto temp_device = static_cast<const VulkanDevice*>(device);
-  auto vk_device = temp_device->device();
-
-  vk::CommandBufferAllocateInfo command_buffer_ai;
-  command_buffer_ai.commandPool = *command_pool_;
-  command_buffer_ai.level = vk::CommandBufferLevel::ePrimary;
-  command_buffer_ai.commandBufferCount = static_cast<std::uint32_t>(images_.size());
-  command_buffers_ =
-      vk_device.allocateCommandBuffersUnique(command_buffer_ai);
-
-  for (int i = 0; i < command_buffers_.size(); ++i) {
-    auto&& command_buffer = command_buffers_[i];
-    vk::CommandBufferBeginInfo command_buffer_bi;
-    command_buffer_bi.flags =
-        vk::CommandBufferUsageFlagBits::eSimultaneousUse;
-    command_buffer->begin(command_buffer_bi);
-
-    vk::RenderPassBeginInfo render_pass_bi;
-    render_pass_bi.renderPass = *render_pass_;
-    render_pass_bi.renderArea.offset = vk::Offset2D{0, 0};
-    render_pass_bi.renderArea.extent =
-        vk::Extent2D{width(), height()};
-    vk::ClearValue clear_value;
-    clear_value.color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
-    render_pass_bi.clearValueCount = 1;
-    render_pass_bi.pClearValues = &clear_value;
-    render_pass_bi.framebuffer = *frame_buffers_[i];
-
-    command_buffer->beginRenderPass(render_pass_bi,
-                                    vk::SubpassContents::eInline);
-    command_buffer->bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                 *pipeline_);
-    command_buffer->draw(3, 1, 0, 0);
-    command_buffer->endRenderPass();
-    command_buffer->end();
   }
 }
 

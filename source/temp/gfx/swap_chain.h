@@ -17,7 +17,7 @@ class SwapChain {
  public:
   virtual ApiType api_type() const = 0;
 
-  virtual void Present(const Device* device) const = 0;
+  virtual void Present(const Device* device) = 0;
 
   virtual void Resize(const Device* device, std::uint32_t width,
                       std::uint32_t height) = 0;

@@ -30,7 +30,7 @@ class VulkanSwapChain : public SwapChain {
 
   ApiType api_type() const override { return ApiType::kVulkan; }
 
-  void Present(const Device* device) const override;
+  void Present(const Device* device) override;
 
   void Resize(const Device* device, std::uint32_t width,
               std::uint32_t height) override;
@@ -54,20 +54,12 @@ class VulkanSwapChain : public SwapChain {
 
   const vk::Framebuffer frame_buffer(int index) const;
 
-  const vk::CommandBuffer command_buffer(int index) const;
+  std::uint32_t AcquireNextImage(const vk::Device vk_device);
+private:
 
-  std::uint32_t AcquireNextImage(const Device* device);
+  void CreateRenderPass(const vk::Device device);
 
-  void CreateRenderPass(const Device* device);
-
-  void CreatePipeline(const Device* device);
-
-  void CreateFrameBuffers(const Device* device);
-
-  void CreateCommandBuffers(const Device* device);
-
- private:
-  // using UniqueSwapchainKHR = vk::UniqueHandle<vk::SwapchainKHR, vk::DispatchLoaderDynamic>;
+  void CreateFrameBuffers(const vk::Device device);
 
   vk::UniqueSurfaceKHR surface_;
   vk::Format color_format_;
@@ -78,14 +70,7 @@ class VulkanSwapChain : public SwapChain {
   std::vector<Image> images_;
   vk::UniqueRenderPass render_pass_;
 
-  vk::UniqueShaderModule vs_module_;
-  vk::UniqueShaderModule fs_module_;
-  vk::UniquePipelineLayout pipeline_layout_;
-  vk::UniquePipeline pipeline_;
-
   std::vector<vk::UniqueFramebuffer> frame_buffers_;
-  vk::UniqueCommandPool command_pool_;
-  std::vector<vk::UniqueCommandBuffer> command_buffers_;
 };
 
 }  // namespace vulkan

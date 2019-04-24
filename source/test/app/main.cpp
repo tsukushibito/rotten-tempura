@@ -229,16 +229,16 @@ class TestRenderer {
       render_pass_bi.renderArea.extent =
           vk::Extent2D{swap_chain->width(), swap_chain->height()};
       vk::ClearValue clear_value;
-      clear_value.color = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f};
+      clear_value.color = std::array<float, 4>{0.1f, 0.3f, 0.5f, 1.0f};
       render_pass_bi.clearValueCount = 1;
       render_pass_bi.pClearValues = &clear_value;
       render_pass_bi.framebuffer = *frame_buffers_[i];
 
       command_buffer->beginRenderPass(render_pass_bi,
                                       vk::SubpassContents::eInline);
-      command_buffer->bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                   *pipeline_);
-      command_buffer->draw(3, 1, 0, 0);
+      // command_buffer->bindPipeline(vk::PipelineBindPoint::eGraphics,
+      //                              *pipeline_);
+      // command_buffer->draw(3, 1, 0, 0);
       command_buffer->endRenderPass();
       command_buffer->end();
     }
@@ -251,7 +251,7 @@ class TestRenderer {
         static_cast<gfx::vulkan::VulkanSwapChain*>(swap_chain);
     auto&& wait_semaphore =
         tvk_swap_chain->current_image().acquire_image_semaphore.get();
-    auto image_index = tvk_swap_chain->AcquireNextImage(tvk_device_.get());
+    auto image_index = tvk_swap_chain->AcquireNextImage(tvk_device_->device());
 
     auto& image = tvk_swap_chain->image(image_index);
     vk::SubmitInfo submit_info;
