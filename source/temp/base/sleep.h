@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
 #define NOMINMAX
 #include <Windows.h>
@@ -8,7 +8,6 @@
 #endif
 
 namespace temp {
-namespace core {
 
 inline void sleep(int ms) {
 #ifdef TEMP_PLATFORM_WINDOWS
@@ -18,5 +17,4 @@ inline void sleep(int ms) {
 #endif
 }
 
-}  // namespace core
 }  // namespace temp

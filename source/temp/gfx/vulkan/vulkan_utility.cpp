@@ -1,4 +1,4 @@
-﻿#include "temp/core/define.h"
+﻿#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
 #include <algorithm>
@@ -7,8 +7,8 @@
 #include <sstream>
 #include <string>
 
-#include "temp/core/assertion.h"
-#include "temp/core/logger.h"
+#include "temp/base/assertion.h"
+#include "temp/base/logger.h"
 
 #include "temp/gfx/vulkan/vulkan_utility.h"
 

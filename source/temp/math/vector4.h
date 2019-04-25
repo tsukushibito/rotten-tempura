@@ -8,8 +8,8 @@
 #include <sstream>
 #include <string>
 
-#include "temp/core/assertion.h"
-#include "temp/core/define.h"
+#include "temp/base/assertion.h"
+#include "temp/base/define.h"
 
 #include "temp/math/vector3.h"
 

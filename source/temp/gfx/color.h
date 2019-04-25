@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace temp {
-namespace core {
+namespace gfx {
 
 struct Color {
   float red;

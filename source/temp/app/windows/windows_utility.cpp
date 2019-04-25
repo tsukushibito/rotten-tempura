@@ -1,4 +1,4 @@
-﻿#include "temp/core/define.h"
+﻿#include "temp/base/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
 #include "Windows.h"
 #include "temp/app/utility.h"

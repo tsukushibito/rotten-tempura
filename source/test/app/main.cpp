@@ -5,12 +5,13 @@
 #include <string>
 #include <vector>
 
-#include <temp/app/app.h>
-#include <temp/core/core.h>
-#include <temp/gfx/gfx.h>
+#include "temp/app/app.h"
+#include "temp/base/base.h"
 
-#include <temp/gfx/vulkan/vulkan_device.h>
-#include <temp/gfx/vulkan/vulkan_swap_chain.h>
+#include "temp/gfx/gfx.h"
+
+#include "temp/gfx/vulkan/vulkan_device.h"
+#include "temp/gfx/vulkan/vulkan_swap_chain.h"
 
 // #include <boost/filesystem.hpp>
 

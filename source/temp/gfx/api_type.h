@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 
 namespace temp {
 namespace gfx {

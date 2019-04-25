@@ -1,9 +1,9 @@
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
 #include <vulkan/vulkan.hpp>
 
-#include "temp/core/logger.h"
+#include "temp/base/logger.h"
 
 #include "temp/gfx/vulkan/vulkan_device.h"
 #include "temp/gfx/vulkan/vulkan_swap_chain.h"

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <iostream>
 
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 
 #if defined(TEMP_PLATFORM_WINDOWS)
 #define NOMINMAX

@@ -6,7 +6,7 @@ target_include_directories(temp_math_test PRIVATE ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(
     temp_math_test
-    temp_core
+    temp_base
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}

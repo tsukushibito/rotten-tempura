@@ -2,9 +2,9 @@
 #include <cstdint>
 #include <memory>
 
-#include "temp/app/application_base.h"
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_PLATFORM_MAC
+#include "temp/app/application_base.h"
 
 namespace temp {
 namespace app {

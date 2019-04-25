@@ -17,6 +17,7 @@
 #define TEMP_GFX_API_D3D11
 
 #define _USE_MATH_DEFINES   // for cmath pi
+#define NOMINMAX
 #endif
 
 #elif defined __APPLE__

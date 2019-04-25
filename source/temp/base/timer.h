@@ -5,7 +5,6 @@
 #include <chrono>
 
 namespace temp {
-namespace core {
 
 class Timer {
  public:
@@ -30,5 +29,4 @@ class Timer {
   std::chrono::system_clock::time_point begin_;
 };
 
-}  // namespace core
 }  // namespace temp

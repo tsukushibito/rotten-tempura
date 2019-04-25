@@ -7,7 +7,7 @@
 #include <streambuf>
 #include <utility>
 
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 
 #ifdef TEMP_PLATFORM_WINDOWS
 #define NOMINMAX
@@ -23,7 +23,6 @@
 #define TEMP_COUT (std::cout << TEMP_FILE << "(" << __LINE__ << "): ")
 
 namespace temp {
-namespace core {
 
 #ifdef TEMP_PLATFORM_WINDOWS
 class DebugStreamBuf : public std::stringbuf {
@@ -117,20 +116,19 @@ class Logger {
   static std::mutex mutex_;
 };
 
-}  // namespace core
 }  // namespace temp
 
 #define TEMP_LOG_TRACE(...) \
-  temp::core::Logger::trace(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::Logger::trace(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_DEBUG(...) \
-  temp::core::Logger::debug(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::Logger::debug(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_INFO(...) \
-  temp::core::Logger::info(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::Logger::info(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_WARNING(...) \
-  temp::core::Logger::warning(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::Logger::warning(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
 
 #define TEMP_LOG_ERROR(...) \
-  temp::core::Logger::error(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)
+  temp::Logger::error(TEMP_FILE, "(", __LINE__, "): ", __VA_ARGS__)

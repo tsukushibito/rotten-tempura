@@ -1,8 +1,8 @@
-﻿#include "temp/core/color.h"
-#include "temp/core/clamp.h"
+﻿#include "temp/gfx/color.h"
+#include "temp/base/clamp.h"
 
 namespace temp {
-namespace core {
+namespace gfx {
 
 const Color Color::kWhite = Color{1.0f, 1.0f, 1.0f, 1.0f};
 const Color Color::kBlack = Color{0.0f, 0.0f, 0.0f, 1.0f};
@@ -34,5 +34,5 @@ Color32Bit ColorToColor32Bit(const Color& color) {
       static_cast<std::uint8_t>(clamp(color.blue, 0.0f, 1.0f) * 0xff),
       static_cast<std::uint8_t>(clamp(color.alpha, 0.0f, 1.0f) * 0xff)};
 }
-}  // namespace core
+}  // namespace base
 }  // namespace temp

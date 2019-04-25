@@ -1,5 +1,4 @@
-﻿#include "temp/core/define.h"
-#include "temp/render/camera.h"
+﻿#include "temp/render/camera.h"
 
 namespace temp {
 namespace render {

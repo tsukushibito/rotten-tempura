@@ -1,15 +1,15 @@
 ﻿#define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include "temp/core/logger.h"
-#include "temp/core/sleep.h"
-#include "temp/core/thread_pool.h"
-#include "temp/core/timer.h"
+#include "temp/base/logger.h"
+#include "temp/base/sleep.h"
+#include "temp/base/thread_pool.h"
+#include "temp/base/timer.h"
 
-using namespace temp::core;
+using namespace temp;
 namespace utf = boost::unit_test;
 
-BOOST_AUTO_TEST_SUITE(core)
+BOOST_AUTO_TEST_SUITE(base)
 BOOST_AUTO_TEST_CASE(logger) {
   Logger::setLogLevel(Logger::LogLevel::kInfo);
   TEMP_LOG_TRACE("trace");

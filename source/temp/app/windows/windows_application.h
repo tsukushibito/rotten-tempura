@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "temp/app/application_base.h"
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
 
 namespace temp {

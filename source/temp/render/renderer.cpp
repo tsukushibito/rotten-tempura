@@ -1,4 +1,4 @@
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 
 #include "temp/render/renderer.h"
 #include "temp/render/camera.h"
@@ -16,7 +16,7 @@ Renderer* CreateVulkanRenderer(
 #ifdef TEMP_GFX_API_VULKAN
   return new vulkan::VulkanRenderer(device);
 #else
-  assert(false);
+  TEMP_ASSERT(false, "");
   return nullptr;
 #endif
 }

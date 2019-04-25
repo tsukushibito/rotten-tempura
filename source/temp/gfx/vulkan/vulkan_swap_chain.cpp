@@ -1,10 +1,9 @@
-#include "temp/core/define.h"
-#ifdef TEMP_PLATFORM_WINDOWS
-#define NOMINMAX
-#endif
+#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_VULKAN
-#include <cassert>
-#include "temp/core/logger.h"
+
+#include "temp/base/logger.h"
+#include "temp/base/assertion.h"
+
 #include "temp/gfx/vulkan/vulkan_device.h"
 #include "temp/gfx/vulkan/vulkan_swap_chain.h"
 #include "temp/gfx/vulkan/vulkan_utility.h"
@@ -135,7 +134,7 @@ VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
 }
 
 void VulkanSwapChain::Present(const Device* device) {
-  assert(device->api_type() == ApiType::kVulkan);
+  TEMP_ASSERT(device->api_type() == ApiType::kVulkan, "device must be VulkanDevice");
   auto temp_device = static_cast<const VulkanDevice*>(device);
   auto vk_device = temp_device->device();
 
@@ -149,14 +148,14 @@ void VulkanSwapChain::Present(const Device* device) {
   present_info.pImageIndices = &image_index;
 
   auto&& iter = temp_device->queue_table().find(vk::QueueFlagBits::eGraphics);
-  assert(iter != temp_device->queue_table().end());
+  TEMP_ASSERT(iter != temp_device->queue_table().end(), "queue_table must contain graphics queue");
   auto&& graphics_queue = iter->second;
   graphics_queue.presentKHR(present_info);
 }
 
 void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
                              std::uint32_t height) {
-  assert(device->api_type() == ApiType::kVulkan);
+  TEMP_ASSERT(device->api_type() == ApiType::kVulkan, "device must be VulkanDevice");
   auto tvk_device = static_cast<const VulkanDevice*>(device);
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();

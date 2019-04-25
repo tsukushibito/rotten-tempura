@@ -1,4 +1,4 @@
-﻿#include "temp/core/define.h"
+﻿#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_D3D11
 
 #include "temp/gfx/d3d11/d3d11_swap_chain.h"

@@ -13,10 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "temp/core/logger.h"
+#include "temp/base/logger.h"
 
 namespace temp {
-namespace core {
 
 class ThreadPool {
  public:
@@ -118,5 +117,4 @@ void ThreadPool::waitForTasks() {
   }
 }
 
-}  // namespace core
 }  // namespace temp

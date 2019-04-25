@@ -1,8 +1,9 @@
 ﻿#define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include "temp/core/define.h"
-#include "temp/core/logger.h"
+
+#include "temp/base/define.h"
+#include "temp/base/logger.h"
 #include "temp/math/temp_math.h"
 
 using namespace temp::math;

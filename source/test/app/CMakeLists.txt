@@ -6,7 +6,7 @@ target_include_directories(temp_app_test PRIVATE ${Boost_INCLUDE_DIR})
 
 target_link_libraries(
     temp_app_test
-    temp_core
+    temp_base
     temp_app
     temp_gfx
 )

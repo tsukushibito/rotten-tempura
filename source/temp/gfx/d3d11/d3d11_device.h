@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_D3D11
 #include <d3d11.h>
 

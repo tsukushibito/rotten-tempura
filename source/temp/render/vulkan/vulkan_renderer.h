@@ -1,6 +1,6 @@
 #pragma once
 
-#include "temp/core/define.h"
+#include "temp/base/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
 #include <mutex>

@@ -1,8 +1,9 @@
-﻿#include "temp/app/windows/windows_application.h"
+﻿#include "temp/base/define.h"
 #ifdef TEMP_PLATFORM_WINDOWS
+#include "temp/app/windows/windows_application.h"
 #include <Windows.h>
 
-#include "temp/core/logger.h"
+#include "temp/base/logger.h"
 
 namespace temp {
 namespace app {
