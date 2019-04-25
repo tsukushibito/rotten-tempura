@@ -1,8 +1,8 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
 #include <vulkan/vulkan.hpp>
 
@@ -11,6 +11,8 @@
 namespace temp {
 namespace gfx {
 namespace vulkan {
+
+class VulkanSwapChain;
 
 class VulkanDevice : public Device {
  public:
@@ -28,7 +30,7 @@ class VulkanDevice : public Device {
 
   ApiType api_type() const override { return ApiType::kVulkan; }
 
-  SwapChain* main_swap_chain() const override { return main_swap_chain_.get(); }
+  SwapChain* main_swap_chain() const override;
 
   std::vector<vk::Format> GetSupportedDepthFormats() const;
 
@@ -66,7 +68,7 @@ class VulkanDevice : public Device {
   vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
       messenger_;
 
-  std::unique_ptr<SwapChain> main_swap_chain_;
+  std::unique_ptr<VulkanSwapChain> main_swap_chain_;
 };
 }  // namespace vulkan
 }  // namespace gfx

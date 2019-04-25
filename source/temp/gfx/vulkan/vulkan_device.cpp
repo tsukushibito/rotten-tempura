@@ -17,7 +17,8 @@ VulkanDevice::VulkanDevice(const void* window, std::uint32_t window_width,
                            std::uint32_t window_height) {
   instance_ = CreateInstance("tempura", "tempura", true);
 
-  dispatcher_.init(*instance_, reinterpret_cast<PFN_vkGetInstanceProcAddr>(vkGetInstanceProcAddr));
+  dispatcher_.init(*instance_, reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+                                   vkGetInstanceProcAddr));
 
   // TODO: Set from config file.
   auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
@@ -68,10 +69,15 @@ VulkanDevice::VulkanDevice(const void* window, std::uint32_t window_width,
         device_->getQueue(iter->second, 0);
   }
 
-  main_swap_chain_ = CreateSwapChain(window, window_width, window_height);
+  main_swap_chain_ = std::make_unique<VulkanSwapChain>(*this, window, window_width, window_height);
 }
 
 VulkanDevice::~VulkanDevice() {}
+
+
+SwapChain* VulkanDevice::main_swap_chain() const {
+	return main_swap_chain_.get();
+}
 
 std::vector<vk::Format> VulkanDevice::GetSupportedDepthFormats() const {
   std::vector<vk::Format> depth_formats = {
@@ -99,7 +105,6 @@ std::unique_ptr<SwapChain> VulkanDevice::CreateSwapChain(
   return std::make_unique<VulkanSwapChain>(*this, window, width, height);
 }
 
-
 const vk::DispatchLoaderDynamic& VulkanDevice::dispatcher() const {
   return dispatcher_;
 }
@@ -112,7 +117,8 @@ vk::PhysicalDevice VulkanDevice::physical_device() const {
 
 vk::Device VulkanDevice::device() const { return *device_; }
 
-const std::map<vk::QueueFlagBits, int>& VulkanDevice::queue_index_table() const {
+const std::map<vk::QueueFlagBits, int>& VulkanDevice::queue_index_table()
+    const {
   return queue_index_table_;
 }
 
@@ -124,10 +130,10 @@ int VulkanDevice::graphics_queue_index() const {
   return iter->second;
 }
 
-const std::map<vk::QueueFlagBits, vk::Queue>& VulkanDevice::queue_table() const {
-	return queue_table_;
+const std::map<vk::QueueFlagBits, vk::Queue>& VulkanDevice::queue_table()
+    const {
+  return queue_table_;
 }
-
 
 }  // namespace vulkan
 }  // namespace gfx
