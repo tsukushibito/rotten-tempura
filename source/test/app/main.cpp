@@ -1,4 +1,4 @@
-#include <cstdlib>
+﻿#include <cstdlib>
 
 #include <fstream>
 #include <iostream>
@@ -205,8 +205,8 @@ class TestRenderer {
     }
 
     vk::CommandPoolCreateInfo command_pool_ci;
-    auto pair = tvk_device_->queue_index_table().find(
-        vk::QueueFlagBits::eGraphics);
+    auto pair =
+        tvk_device_->queue_index_table().find(vk::QueueFlagBits::eGraphics);
     command_pool_ci.queueFamilyIndex = pair->second;
     command_pool_ = vk_device.createCommandPoolUnique(command_pool_ci);
 
@@ -309,6 +309,26 @@ class TestRenderer {
 };
 
 int main(int argc, char* argv[]) {
+  struct Data {
+    Data() { TEMP_LOG_TRACE("Data()"); }
+
+    ~Data() { TEMP_LOG_TRACE("~Data()"); }
+
+    int id;
+  };
+
+  temp::ObjectManager<Data> dataManager;
+  {
+    auto data0 = dataManager.CreateObject();
+    data0->entity().id = 0;
+
+    auto data1 = dataManager.CreateObject();
+    data1->entity().id = 1;
+	
+	dataManager.Foreach([](Data& d) { TEMP_LOG_TRACE("id: ", d.id); });
+  }
+  dataManager.RemoveUnusedEntity();
+
   app::Application application;
 
   auto window = application.native_window_handle();
