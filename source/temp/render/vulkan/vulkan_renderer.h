@@ -14,8 +14,6 @@ namespace temp {
 namespace render {
 namespace vulkan {
 class VulkanRenderer : public Renderer {
-  using VkDeviceSPtr = std::shared_ptr<gfx::vulkan::VulkanDevice>;
-
  public:
   VulkanRenderer() = delete;
   explicit VulkanRenderer(const std::shared_ptr<gfx::Device>& device);
@@ -23,6 +21,8 @@ class VulkanRenderer : public Renderer {
   void Render() override;
 
  private:
+  using VkDeviceSPtr = std::shared_ptr<gfx::vulkan::VulkanDevice>;
+
   VkDeviceSPtr device_;
 };
 }  // namespace vulkan
