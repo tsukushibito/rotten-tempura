@@ -44,8 +44,8 @@ std::vector<VulkanSwapChain::Image> CreateSwapChainImages(
   return images;
 }
 
-
-vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device, vk::Format color_format) {
+vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device,
+                                      vk::Format color_format) {
   vk::AttachmentDescription color_attachment;
   color_attachment.format = color_format;
   color_attachment.samples = vk::SampleCountFlagBits::e1;
@@ -55,16 +55,16 @@ vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device, vk::Format col
   color_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
   color_attachment.initialLayout = vk::ImageLayout::eUndefined;
   color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
-  
+
   vk::AttachmentReference color_attachment_ref;
   color_attachment_ref.attachment = 0;
   color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
-  
+
   vk::SubpassDescription subpass;
   subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
   subpass.colorAttachmentCount = 1;
   subpass.pColorAttachments = &color_attachment_ref;
-  
+
   vk::RenderPassCreateInfo render_pass_ci;
   vk::SubpassDependency subpass_dependency;
   subpass_dependency.dstSubpass = 0;
@@ -73,9 +73,8 @@ vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device, vk::Format col
   subpass_dependency.srcAccessMask = vk::AccessFlagBits();
   subpass_dependency.dstStageMask =
       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  subpass_dependency.dstAccessMask =
-      vk::AccessFlagBits::eColorAttachmentRead |
-      vk::AccessFlagBits::eColorAttachmentWrite;
+  subpass_dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
+                                     vk::AccessFlagBits::eColorAttachmentWrite;
   render_pass_ci.attachmentCount = 1;
   render_pass_ci.pAttachments = &color_attachment;
   render_pass_ci.subpassCount = 1;
@@ -86,12 +85,13 @@ vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device, vk::Format col
 }
 
 std::vector<vk::UniqueFramebuffer> CreateFrameBuffers(
-    const vk::Device vk_device, const std::vector<VulkanSwapChain::Image>& images,
+    const vk::Device vk_device,
+    const std::vector<VulkanSwapChain::Image>& images,
     vk::RenderPass render_pass, std::uint32_t width, std::uint32_t height) {
   std::vector<vk::UniqueFramebuffer> frame_buffers;
 
   auto image_count = images.size();
-  for (auto&& image: images) {
+  for (auto&& image : images) {
     vk::ImageView attachments[] = {*image.view};
 
     vk::FramebufferCreateInfo frame_buffer_ci;
@@ -178,7 +178,8 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
 
   auto old_image_count = vk_device.getSwapchainImagesKHR(*swap_chain_).size();
 
-  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr, tvk_device->dispatcher());
+  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr,
+  // tvk_device->dispatcher());
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
   if (swap_chain_ci_.oldSwapchain != vk::SwapchainKHR()) {
     for (auto&& image : images_) {
@@ -229,7 +230,7 @@ vk::SwapchainKHR VulkanSwapChain::swap_chain() const {
 }
 
 const std::uint32_t VulkanSwapChain::image_count() const {
-	return static_cast<std::uint32_t>(images_.size());
+  return static_cast<std::uint32_t>(images_.size());
 }
 
 const VulkanSwapChain::Image& VulkanSwapChain::image(int index) const {
@@ -245,7 +246,6 @@ const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
 }
 
 std::uint32_t VulkanSwapChain::AcquireNextImage(const vk::Device vk_device) {
-
   auto result_value = vk_device.acquireNextImageKHR(
       *swap_chain_, std::numeric_limits<uint64_t>::max(),
       *images_[current_image_].acquire_image_semaphore,

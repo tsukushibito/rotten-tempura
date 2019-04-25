@@ -11,26 +11,26 @@
 
 namespace temp {
 namespace gfx {
-namespace dx11 {
+namespace d3d11 {
 
-class Dx11Device : public Device {
+class D3d11Device : public Device {
  public:
   template <class T>
   using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-  Dx11Device() : Dx11Device(nullptr, 0, 0) {}
-  explicit Dx11Device(const void* window, std::uint32_t window_width,
-                      std::uint32_t window_height);
+  D3d11Device() : D3d11Device(nullptr, 0, 0) {}
+  explicit D3d11Device(const void* window, std::uint32_t window_width,
+                       std::uint32_t window_height);
 
-  ~Dx11Device();
+  ~D3d11Device();
 
-  Dx11Device(const Dx11Device&) = delete;
-  Dx11Device& operator=(const Dx11Device&) = delete;
+  D3d11Device(const D3d11Device&) = delete;
+  D3d11Device& operator=(const D3d11Device&) = delete;
 
-  Dx11Device(Dx11Device&& other) = default;
-  Dx11Device& operator=(Dx11Device&& other) = default;
+  D3d11Device(D3d11Device&& other) = default;
+  D3d11Device& operator=(D3d11Device&& other) = default;
 
-  ApiType api_type() const override { return ApiType::kVulkan; }
+  ApiType api_type() const override { return ApiType::kD3D11; }
 
   SwapChain* main_swap_chain() const override { return main_swap_chain_.get(); }
 
@@ -42,7 +42,7 @@ class Dx11Device : public Device {
   ComPtr<ID3D11Device> device_;
   std::unique_ptr<SwapChain> main_swap_chain_;
 };
-}  // namespace dx11
+}  // namespace d3d11
 }  // namespace gfx
 }  // namespace temp
 #endif
