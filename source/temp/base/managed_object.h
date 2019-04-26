@@ -15,16 +15,16 @@ class ObjectManager;
 template <class T>
 class ManagedObject {
  public:
-  ManagedObject(std::unique_ptr<T>&& entity,
+  ManagedObject(std::unique_ptr<T>&& instance,
                 const std::function<void(std::unique_ptr<T>&&)>& on_destroy)
-      : entity_(std::move(entity)), on_destroy_(on_destroy) {}
+      : instance_(std::move(instance)), on_destroy_(on_destroy) {}
 
-  ~ManagedObject() { on_destroy_(std::move(entity_)); }
+  ~ManagedObject() { on_destroy_(std::move(instance_)); }
 
-  T& entity() { return *entity_; }
+  T& instance() { return *instance_; }
 
  private:
-  std::unique_ptr<T> entity_;
+  std::unique_ptr<T> instance_;
   std::function<void(std::unique_ptr<T>)> on_destroy_;
 };
 
@@ -32,45 +32,45 @@ template <class T>
 class ObjectManager {
  public:
   ObjectManager() {
-    unused_entities_ = std::make_shared<std::vector<std::unique_ptr<T>>>();
-    unused_entities_mutex_ = std::make_shared<std::mutex>();
+    unused_instances_ = std::make_shared<std::vector<std::unique_ptr<T>>>();
+    unused_instances_mutex_ = std::make_shared<std::mutex>();
   }
 
   std::unique_ptr<ManagedObject<T>> CreateObject() {
-    std::unique_lock<std::mutex> lock(entity_table_mutex_);
-    auto&& entity = std::unique_ptr<T>(new T());
-    entity_table_.insert(entity.get());
+    std::unique_lock<std::mutex> lock(instance_table_mutex_);
+    auto&& instance = std::unique_ptr<T>(new T());
+    instance_table_.insert(instance.get());
     auto on_destroy =
-        [unused_entities = unused_entities_,
-         mutex = unused_entities_mutex_](std::unique_ptr<T>&& entity) {
+        [unused_instances = unused_instances_,
+         mutex = unused_instances_mutex_](std::unique_ptr<T>&& instance) {
           std::unique_lock<std::mutex> lock(*mutex);
-          unused_entities->emplace_back(std::move(entity));
+          unused_instances->emplace_back(std::move(instance));
         };
 
-    return std::make_unique<ManagedObject<T>>(std::move(entity), on_destroy);
+    return std::make_unique<ManagedObject<T>>(std::move(instance), on_destroy);
   }
 
-  void RemoveUnusedEntity() {
-    std::unique_lock<std::mutex> list_lock(*unused_entities_mutex_);
-    std::unique_lock<std::mutex> table_lock(entity_table_mutex_);
-    for (auto&& entity : *unused_entities_) {
-      entity_table_.erase(entity.get());
+  void RemoveUnusedInstance() {
+    std::unique_lock<std::mutex> list_lock(*unused_instances_mutex_);
+    std::unique_lock<std::mutex> table_lock(instance_table_mutex_);
+    for (auto&& instance : *unused_instances_) {
+      instance_table_.erase(instance.get());
     }
-    unused_entities_->clear();
+    unused_instances_->clear();
   }
 
   void Foreach(const std::function<void(T&)>& f) {
-    std::unique_lock<std::mutex> lock(entity_table_mutex_);
-    for (auto&& entity : entity_table_) {
-      f(*entity);
+    std::unique_lock<std::mutex> lock(instance_table_mutex_);
+    for (auto&& instance : instance_table_) {
+      f(*instance);
     }
   }
 
  private:
-  std::shared_ptr<std::vector<std::unique_ptr<T>>> unused_entities_;
-  std::shared_ptr<std::mutex> unused_entities_mutex_;
+  std::shared_ptr<std::vector<std::unique_ptr<T>>> unused_instances_;
+  std::shared_ptr<std::mutex> unused_instances_mutex_;
 
-  std::unordered_set<T*> entity_table_;
-  std::mutex entity_table_mutex_;
+  std::unordered_set<T*> instance_table_;
+  std::mutex instance_table_mutex_;
 };
 }  // namespace temp

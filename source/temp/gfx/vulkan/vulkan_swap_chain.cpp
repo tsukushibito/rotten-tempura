@@ -1,8 +1,8 @@
 #include "temp/base/define.h"
 #ifdef TEMP_GFX_API_VULKAN
 
-#include "temp/base/logger.h"
 #include "temp/base/assertion.h"
+#include "temp/base/logger.h"
 
 #include "temp/gfx/vulkan/vulkan_device.h"
 #include "temp/gfx/vulkan/vulkan_swap_chain.h"
@@ -131,10 +131,16 @@ VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const void* window,
 
   images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                   swap_chain_ci_.imageFormat);
+
+  render_pass_ = CreateRenderPass(vk_device, swap_chain_ci_.imageFormat);
+
+  frame_buffers_ =
+      CreateFrameBuffers(vk_device, images_, *render_pass_, width, height);
 }
 
 void VulkanSwapChain::Present(const Device* device) {
-  TEMP_ASSERT(device->api_type() == ApiType::kVulkan, "device must be VulkanDevice");
+  TEMP_ASSERT(device->api_type() == ApiType::kVulkan,
+              "device must be VulkanDevice");
   auto temp_device = static_cast<const VulkanDevice*>(device);
   auto vk_device = temp_device->device();
 
@@ -148,14 +154,16 @@ void VulkanSwapChain::Present(const Device* device) {
   present_info.pImageIndices = &image_index;
 
   auto&& iter = temp_device->queue_table().find(vk::QueueFlagBits::eGraphics);
-  TEMP_ASSERT(iter != temp_device->queue_table().end(), "queue_table must contain graphics queue");
+  TEMP_ASSERT(iter != temp_device->queue_table().end(),
+              "queue_table must contain graphics queue");
   auto&& graphics_queue = iter->second;
   graphics_queue.presentKHR(present_info);
 }
 
 void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
                              std::uint32_t height) {
-  TEMP_ASSERT(device->api_type() == ApiType::kVulkan, "device must be VulkanDevice");
+  TEMP_ASSERT(device->api_type() == ApiType::kVulkan,
+              "device must be VulkanDevice");
   auto tvk_device = static_cast<const VulkanDevice*>(device);
   auto vk_physical_device = tvk_device->physical_device();
   auto vk_device = tvk_device->device();
@@ -177,8 +185,6 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
 
   auto old_image_count = vk_device.getSwapchainImagesKHR(*swap_chain_).size();
 
-  // swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_, nullptr,
-  // tvk_device->dispatcher());
   swap_chain_ = vk_device.createSwapchainKHRUnique(swap_chain_ci_);
   if (swap_chain_ci_.oldSwapchain != vk::SwapchainKHR()) {
     for (auto&& image : images_) {
@@ -202,6 +208,12 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
 
     images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                     swap_chain_ci_.imageFormat);
+
+    render_pass_ = CreateRenderPass(vk_device, swap_chain_ci_.imageFormat);
+
+    frame_buffers_ =
+        CreateFrameBuffers(vk_device, images_, *render_pass_,
+                           swapchain_extent.width, swapchain_extent.height);
   }
 }
 

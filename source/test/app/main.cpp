@@ -320,14 +320,14 @@ int main(int argc, char* argv[]) {
   temp::ObjectManager<Data> dataManager;
   {
     auto data0 = dataManager.CreateObject();
-    data0->entity().id = 0;
+    data0->instance().id = 0;
 
     auto data1 = dataManager.CreateObject();
-    data1->entity().id = 1;
-	
-	dataManager.Foreach([](Data& d) { TEMP_LOG_TRACE("id: ", d.id); });
+    data1->instance().id = 1;
+
+    dataManager.Foreach([](Data& d) { TEMP_LOG_TRACE("id: ", d.id); });
   }
-  dataManager.RemoveUnusedEntity();
+  dataManager.RemoveUnusedInstance();
 
   app::Application application;
 

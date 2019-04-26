@@ -56,8 +56,7 @@ class VulkanSwapChain : public SwapChain {
 
   std::uint32_t AcquireNextImage(const vk::Device vk_device);
 
-private:
-
+ private:
   vk::UniqueSurfaceKHR surface_;
   vk::Format color_format_;
   vk::ColorSpaceKHR color_space_;
@@ -66,7 +65,6 @@ private:
   std::uint32_t current_image_ = 0;
   std::vector<Image> images_;
   vk::UniqueRenderPass render_pass_;
-
   std::vector<vk::UniqueFramebuffer> frame_buffers_;
 };
 
