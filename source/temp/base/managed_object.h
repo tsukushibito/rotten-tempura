@@ -38,7 +38,7 @@ class ObjectManager {
 
   std::unique_ptr<ManagedObject<T>> CreateObject() {
     std::unique_lock<std::mutex> lock(entity_table_mutex_);
-    auto&& entity = std::make_unique<T>();
+    auto&& entity = std::unique_ptr<T>(new T());
     entity_table_.insert(entity.get());
     auto on_destroy =
         [unused_entities = unused_entities_,
@@ -61,9 +61,9 @@ class ObjectManager {
 
   void Foreach(const std::function<void(T&)>& f) {
     std::unique_lock<std::mutex> lock(entity_table_mutex_);
-    for (auto&& entity: entity_table_) {
+    for (auto&& entity : entity_table_) {
       f(*entity);
-	}
+    }
   }
 
  private:

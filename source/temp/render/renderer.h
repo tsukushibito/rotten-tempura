@@ -4,12 +4,15 @@
 #include <mutex>
 #include <unordered_set>
 
+#include "temp/base/managed_object.h"
+
 #include "temp/gfx/device.h"
 
 namespace temp {
 namespace render {
 
 struct Camera;
+using CameraHandle = ManagedObject<Camera>;
 
 class Renderer {
  public:
@@ -18,13 +21,10 @@ class Renderer {
 
   virtual void Render() = 0;
 
-  std::unique_ptr<Camera> CreateCamera();
+  std::unique_ptr<CameraHandle> CreateCamera();
 
  protected:
-  using CameraTable = std::unordered_set<Camera*>;
-
-  std::shared_ptr<CameraTable> camera_table_;
-  std::shared_ptr<std::mutex> camera_table_mutex_;
+  ObjectManager<Camera> camera_manager_;
 };
 
 std::unique_ptr<Renderer> CreateRenderer(
