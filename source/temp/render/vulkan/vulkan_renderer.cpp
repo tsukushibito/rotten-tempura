@@ -66,11 +66,49 @@ VulkanRenderer::VulkanRenderer(const std::shared_ptr<gfx::Device>& device) {
 void VulkanRenderer::Render() {
   using namespace std;
   using namespace gfx::vulkan;
+
+  primary_command_buffers_.clear();
+
   camera_manager_->Foreach([this](Camera camera) {
     if (camera.swap_chain != nullptr) {
+      vk::CommandBufferAllocateInfo command_buffer_ai;
+      command_buffer_ai.commandPool = *command_pool_;
+      command_buffer_ai.level = vk::CommandBufferLevel::ePrimary;
+      command_buffer_ai.commandBufferCount = 1;
+      auto command_buffers =
+          device_->device().allocateCommandBuffersUnique(command_buffer_ai);
+
+      auto&& command_buffer = command_buffers[0];
+
       auto swap_chain = static_pointer_cast<VulkanSwapChain>(camera.swap_chain);
-      auto current_image_index = swap_chain->current_image_index();
-      auto frame_buffer = swap_chain->frame_buffer(current_image_index);
+
+      vk::CommandBufferBeginInfo command_buffer_bi;
+      command_buffer_bi.flags =
+          vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+      command_buffer->begin(command_buffer_bi);
+
+      vk::RenderPassBeginInfo render_pass_bi;
+      render_pass_bi.renderPass = swap_chain->render_pass();
+      render_pass_bi.renderArea.offset = vk::Offset2D{0, 0};
+      render_pass_bi.renderArea.extent =
+          vk::Extent2D{swap_chain->width(), swap_chain->height()};
+      vk::ClearValue clear_value;
+      auto&& c = camera.clear_color;
+      clear_value.color.setFloat32({c.red, c.green, c.blue, c.alpha});
+      render_pass_bi.clearValueCount = 1;
+      render_pass_bi.pClearValues = &clear_value;
+      render_pass_bi.framebuffer = swap_chain->current_frame_buffer();
+
+      command_buffer->beginRenderPass(render_pass_bi,
+                                      vk::SubpassContents::eInline);
+
+      command_buffer->endRenderPass();
+      command_buffer->end();
+
+      primary_command_buffers_.insert(
+          primary_command_buffers_.end(),
+          make_move_iterator(command_buffers.begin()),
+          make_move_iterator(command_buffers.end()));
     }
     camera.clear_color;
   });

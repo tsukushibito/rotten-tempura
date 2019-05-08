@@ -40,19 +40,21 @@ class VulkanSwapChain : public SwapChain {
 
   std::uint32_t current_image_index() const;
 
+  const std::uint32_t image_count() const;
+
+  const Image& image(int index) const;
+
   const Image& current_image() const;
+
+  const vk::Framebuffer frame_buffer(int index) const;
+
+  const vk::Framebuffer current_frame_buffer() const;
 
   vk::Format color_format() const;
 
   vk::SwapchainKHR swap_chain() const;
 
-  const std::uint32_t image_count() const;
-
-  const Image& image(int index) const;
-
   const vk::RenderPass render_pass() const;
-
-  const vk::Framebuffer frame_buffer(int index) const;
 
   std::uint32_t AcquireNextImage(const vk::Device vk_device);
 

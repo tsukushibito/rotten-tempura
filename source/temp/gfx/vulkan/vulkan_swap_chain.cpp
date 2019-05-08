@@ -226,8 +226,25 @@ std::uint32_t VulkanSwapChain::height() const {
 std::uint32_t VulkanSwapChain::current_image_index() const {
   return current_image_;
 }
+
+const std::uint32_t VulkanSwapChain::image_count() const {
+  return static_cast<std::uint32_t>(images_.size());
+}
+
+const VulkanSwapChain::Image& VulkanSwapChain::image(int index) const {
+  return images_[index];
+}
+
 const VulkanSwapChain::Image& VulkanSwapChain::current_image() const {
   return images_[current_image_];
+}
+
+const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
+  return *frame_buffers_[index];
+}
+
+const vk::Framebuffer VulkanSwapChain::current_frame_buffer() const {
+  return *frame_buffers_[current_image_];
 }
 
 vk::Format VulkanSwapChain::color_format() const {
@@ -238,20 +255,8 @@ vk::SwapchainKHR VulkanSwapChain::swap_chain() const {
   return swap_chain_.get();
 }
 
-const std::uint32_t VulkanSwapChain::image_count() const {
-  return static_cast<std::uint32_t>(images_.size());
-}
-
-const VulkanSwapChain::Image& VulkanSwapChain::image(int index) const {
-  return images_[index];
-}
-
 const vk::RenderPass VulkanSwapChain::render_pass() const {
   return *render_pass_;
-}
-
-const vk::Framebuffer VulkanSwapChain::frame_buffer(int index) const {
-  return *frame_buffers_[index];
 }
 
 std::uint32_t VulkanSwapChain::AcquireNextImage(const vk::Device vk_device) {
