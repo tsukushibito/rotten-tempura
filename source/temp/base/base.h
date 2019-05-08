@@ -2,7 +2,7 @@
 #include "temp/base/assertion.h"
 #include "temp/base/define.h"
 #include "temp/base/logger.h"
-#include "temp/base/managed_object.h"
+#include "temp/base/object_manager.h"
 #include "temp/base/read_file.h"
 #include "temp/base/sleep.h"
 #include "temp/base/thread_pool.h"

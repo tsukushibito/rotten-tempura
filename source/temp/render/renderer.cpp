@@ -22,12 +22,12 @@ Renderer* CreateVulkanRenderer(
 }
 }  // namespace
 
-Renderer::Renderer() {}
+Renderer::Renderer() { camera_manager_ = ObjectManager<Camera>::Create(); }
 
 Renderer::~Renderer() {}
 
-std::unique_ptr<CameraHandle> Renderer::CreateCamera() {
-  return camera_manager_.CreateObject();
+ObjectManager<Camera>::CreateType Renderer::CreateCamera() {
+  return camera_manager_->CreateObject();
 }
 
 std::unique_ptr<Renderer> CreateRenderer(

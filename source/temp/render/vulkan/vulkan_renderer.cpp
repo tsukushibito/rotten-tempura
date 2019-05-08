@@ -9,7 +9,7 @@ namespace temp {
 namespace render {
 namespace vulkan {
 
-	namespace {
+namespace {
 vk::UniqueRenderPass CreateRenderPass(const vk::Device vk_device,
                                       vk::Format color_format) {
   vk::AttachmentDescription color_attachment;
@@ -55,18 +55,26 @@ VulkanRenderer::VulkanRenderer(const std::shared_ptr<gfx::Device>& device) {
   using namespace std;
   using namespace gfx::vulkan;
   device_ = static_pointer_cast<VulkanDevice>(device);
-  camera_table_ = make_shared<CameraTable>();
-  camera_table_mutex_ = make_shared<mutex>();
+  auto vk_device = device_->device();
+
+  vk::CommandPoolCreateInfo command_pool_ci;
+  auto pair = device_->queue_index_table().find(vk::QueueFlagBits::eGraphics);
+  command_pool_ci.queueFamilyIndex = pair->second;
+  command_pool_ = vk_device.createCommandPoolUnique(command_pool_ci);
 }
 
 void VulkanRenderer::Render() {
   using namespace std;
   using namespace gfx::vulkan;
-  unique_lock<mutex> lock(*camera_table_mutex_);
-  for (auto&& camera : *camera_table_) {
-    auto&& vk_swap_chain =
-        static_pointer_cast<VulkanSwapChain>(camera->swap_chain);
-  }
+  camera_manager_->Foreach([this](Camera camera) {
+    if (camera.swap_chain != nullptr) {
+      auto swap_chain = static_pointer_cast<VulkanSwapChain>(camera.swap_chain);
+      auto current_image_index = swap_chain->current_image_index();
+      auto frame_buffer = swap_chain->frame_buffer(current_image_index);
+    }
+    camera.clear_color;
+  });
+  camera_manager_->RemoveUnusedObjects();
 }
 }  // namespace vulkan
 }  // namespace render

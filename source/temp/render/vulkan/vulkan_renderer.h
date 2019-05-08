@@ -24,6 +24,9 @@ class VulkanRenderer : public Renderer {
   using VkDeviceSPtr = std::shared_ptr<gfx::vulkan::VulkanDevice>;
 
   VkDeviceSPtr device_;
+
+  vk::UniqueCommandPool command_pool_;
+  std::vector<vk::UniqueCommandBuffer> primary_command_buffers_;
 };
 }  // namespace vulkan
 }  // namespace render

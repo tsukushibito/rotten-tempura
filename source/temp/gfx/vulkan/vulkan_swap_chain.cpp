@@ -209,8 +209,6 @@ void VulkanSwapChain::Resize(const Device* device, std::uint32_t width,
     images_ = CreateSwapChainImages(vk_device, *swap_chain_,
                                     swap_chain_ci_.imageFormat);
 
-    render_pass_ = CreateRenderPass(vk_device, swap_chain_ci_.imageFormat);
-
     frame_buffers_ =
         CreateFrameBuffers(vk_device, images_, *render_pass_,
                            swapchain_extent.width, swapchain_extent.height);
